@@ -7,7 +7,7 @@ export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
   const currency = "Rs. ";
-  const delivery_fee = 250;
+  const delivery_fee = 0;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [search, setsearch] = useState("");
@@ -53,7 +53,7 @@ const ShopContextProvider = (props) => {
         await axios.post(
           backendUrl + "/api/cart/add",
           { itemId, size },
-          { headers: { token } }
+          { headers: { token } },
         );
       } catch (error) {
         console.log(error);
@@ -96,7 +96,7 @@ const ShopContextProvider = (props) => {
         await axios.post(
           backendUrl + "/api/cart/update",
           { itemId, size, quantity },
-          { headers: { token } }
+          { headers: { token } },
         );
       } catch (error) {
         console.log(error);
@@ -158,7 +158,7 @@ const ShopContextProvider = (props) => {
       const response = await axios.post(
         backendUrl + "/api/cart/get",
         {},
-        { headers: { token } }
+        { headers: { token } },
       );
 
       if (response.data.success) {

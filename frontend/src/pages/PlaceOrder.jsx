@@ -27,9 +27,7 @@ const PlaceOrder = () => {
     email: "",
     street: "",
     city: "",
-    state: "",
-    zipcode: "",
-    country: "",
+
     phone: "",
   });
 
@@ -50,7 +48,7 @@ const PlaceOrder = () => {
         for (const item in cartItems[items]) {
           if (cartItems[items][item] > 0) {
             const itemInfo = structuredClone(
-              products.find((product) => product._id === items)
+              products.find((product) => product._id === items),
             );
 
             if (itemInfo) {
@@ -75,7 +73,7 @@ const PlaceOrder = () => {
             const response = await axios.post(
               backendUrl + "/api/orders/place",
               orderData,
-              { headers: { token } }
+              { headers: { token } },
             );
 
             if (response.data.success) {
@@ -104,7 +102,7 @@ const PlaceOrder = () => {
             const response = await axios.post(
               backendUrl + "/api/orders/initiateJazzcash",
               orderData,
-              { headers: { token } }
+              { headers: { token } },
             );
 
             if (response.data.success) {
@@ -200,36 +198,8 @@ const PlaceOrder = () => {
             type="text"
             placeholder="City"
           />
-          <input
-            required
-            onChange={onChangeHandler}
-            name="state"
-            value={formData.state}
-            className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="State"
-          />
         </div>
-        <div className="flex gap-3">
-          <input
-            required
-            onChange={onChangeHandler}
-            name="zipcode"
-            value={formData.zipcode}
-            className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-            type="number"
-            placeholder="Zipcode"
-          />
-          <input
-            required
-            onChange={onChangeHandler}
-            name="country"
-            value={formData.country}
-            className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="Country"
-          />
-        </div>
+
         <input
           onChange={onChangeHandler}
           name="phone"
@@ -302,7 +272,7 @@ const PlaceOrder = () => {
                 if (loading) return;
 
                 const allFilled = Object.values(formData).every(
-                  (val) => val.trim() !== ""
+                  (val) => val.trim() !== "",
                 );
 
                 if (!allFilled) {

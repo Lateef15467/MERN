@@ -38,14 +38,12 @@ const Contact = () => {
           <h2 className="font-semibold text-3xl text-gray-700 flex items-center gap-3">
             <FaMapMarkerAlt className="text-[#0B132B]" /> Our Store
           </h2>
-          <p className="text-gray-600 leading-relaxed">
-            Near Govt. Boys Degree College Skardu, Main Bazaar, Skardu
-          </p>
+          <p className="text-gray-600 leading-relaxed">Toq Olding, Skardu</p>
 
           <div className="flex flex-col gap-2 text-gray-600">
             <p className="flex items-center gap-2">
               <FaPhoneAlt className="text-[#0B132B]" />{" "}
-              <span className="font-medium">+92 355 4105076</span>
+              <span className="font-medium">+92 3412996639</span>
             </p>
             <p className="flex items-center gap-2">
               <FaEnvelope className="text-[#0B132B]" />{" "}
@@ -54,6 +52,36 @@ const Contact = () => {
                 className="hover:text-[#FCA311] transition-colors duration-300"
               >
                 lateef4262@gmail.com
+              </a>
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 text-gray-600">
+            <p className="flex items-center gap-2">
+              <FaPhoneAlt className="text-[#0B132B]" />{" "}
+              <span className="font-medium">+92 3555400378</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <FaEnvelope className="text-[#0B132B]" />{" "}
+              <a
+                href="mailto:lateef4262@gmail.com"
+                className="hover:text-[#FCA311] transition-colors duration-300"
+              >
+                asku0019@gmail.com
+              </a>
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 text-gray-600">
+            <p className="flex items-center gap-2">
+              <FaPhoneAlt className="text-[#0B132B]" />{" "}
+              <span className="font-medium">+92 3467161715</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <FaEnvelope className="text-[#0B132B]" />{" "}
+              <a
+                href="mailto:lateef4262@gmail.com"
+                className="hover:text-[#FCA311] transition-colors duration-300"
+              >
+                zeeshanlahari786@gmail.com
               </a>
             </p>
           </div>
