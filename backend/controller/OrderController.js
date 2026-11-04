@@ -220,19 +220,19 @@ export const jazzcashResponse = async (req, res) => {
     if (code === "000") {
       await orderModel.findOneAndUpdate(
         { transactionId: refNo },
-        { payment: true, status: "Payment Successful" }
+        { payment: true, status: "Payment Successful" },
       );
-      return res.redirect("https://shopnowf.vercel.app/payment-success");
+      return res.redirect("https://BaltiMartf.vercel.app/payment-success");
     }
 
     await orderModel.findOneAndUpdate(
       { transactionId: refNo },
-      { payment: false, status: "Payment Failed" }
+      { payment: false, status: "Payment Failed" },
     );
 
-    res.redirect("https://shopnowf.vercel.app/payment-failed");
+    res.redirect("https://BaltiMartf.vercel.app/payment-failed");
   } catch (error) {
-    res.redirect("https://shopnowf.vercel.app/payment-error");
+    res.redirect("https://BaltiMartf.vercel.app/payment-error");
   }
 };
 export const jazzcashIPN = async (req, res) => {
@@ -250,7 +250,7 @@ export const jazzcashIPN = async (req, res) => {
     if (responseCode === "000") {
       await orderModel.findOneAndUpdate(
         { transactionId: txnRefNo },
-        { payment: true, status: "Payment Successful" }
+        { payment: true, status: "Payment Successful" },
       );
       console.log("✅ Payment confirmed via IPN");
       return res.status(200).send("IPN Received");
@@ -258,7 +258,7 @@ export const jazzcashIPN = async (req, res) => {
 
     await orderModel.findOneAndUpdate(
       { transactionId: txnRefNo },
-      { payment: false, status: "Payment Failed" }
+      { payment: false, status: "Payment Failed" },
     );
 
     console.log("❌ Payment failed via IPN");

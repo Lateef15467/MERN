@@ -12,7 +12,7 @@ const SupplierList = () => {
   const fetchSuppliers = async () => {
     try {
       const response = await axios.get(
-        "https://shopnow-phi.vercel.app/api/supplier/all"
+        "https://BaltiMart-phi.vercel.app/api/supplier/all",
       );
 
       if (response.data.success) {
@@ -39,7 +39,7 @@ const SupplierList = () => {
   const confirmDelete = async () => {
     try {
       const response = await axios.delete(
-        `https://shopnow-phi.vercel.app/api/supplier/delete/${deleteId}`
+        `https://BaltiMart-phi.vercel.app/api/supplier/delete/${deleteId}`,
       );
 
       if (response.data.success) {

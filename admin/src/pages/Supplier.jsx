@@ -19,8 +19,8 @@ const Supplier = () => {
 
     try {
       const response = await axios.post(
-        "https://shopnow-phi.vercel.app/api/supplier/add-supplier",
-        supplier
+        "https://BaltiMart-phi.vercel.app/api/supplier/add-supplier",
+        supplier,
       );
 
       if (response.data.success) {

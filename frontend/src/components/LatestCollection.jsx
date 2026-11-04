@@ -19,7 +19,7 @@ const LatestCollection = () => {
           Explore our newest arrivals designed to match your style and needs.
           From fresh trends to timeless essentials, our latest collection brings
           you the perfect mix of fashion, quality, and comfort. Stay ahead and
-          shop the newest looks today at <b>ShopNow</b>.
+          shop the newest looks today at <b>BaltiMart</b>.
         </p>
       </div>
       {/* rendering product */}

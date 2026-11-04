@@ -41,8 +41,8 @@ const resetTokens = new Map();
 //         <p>Hello ${user.name || "User"},</p>
 //         <p>You requested to reset your password. Click the button below to reset it:</p>
 //         <div style="text-align: center; margin: 30px 0;">
-//           <a href="${resetLink}" 
-//              style="background-color: #000; color: white; padding: 12px 24px; 
+//           <a href="${resetLink}"
+//              style="background-color: #000; color: white; padding: 12px 24px;
 //                     text-decoration: none; border-radius: 5px; display: inline-block;">
 //             Reset Password
 //           </a>
@@ -54,7 +54,7 @@ const resetTokens = new Map();
 //       </div>
 //     `;
 
-//     await sendEmail(email, "Reset Your Password - ShopNow", html);
+//     await sendEmail(email, "Reset Your Password - BaltiMart", html);
 
 //     console.log(`Reset link sent to: ${email}`);
 //     res.json({
@@ -71,7 +71,7 @@ const resetTokens = new Map();
 // };
 
 // coded by furman ali
- const forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -117,7 +117,6 @@ const resetTokens = new Map();
     res.json({ success: false, message: "Server error" });
   }
 };
-
 
 // =============== Reset Password ===============
 // const resetPassword = async (req, res) => {
@@ -202,10 +201,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     console.log("HASHED TOKEN:", hashedToken);
 
@@ -239,7 +235,6 @@ const resetPassword = async (req, res) => {
     });
   }
 };
-
 
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
@@ -351,7 +346,7 @@ const registerUser = async (req, res) => {
       </div>
     `;
 
-    await sendEmail(email, "Verify Your Email - ShopNow", html);
+    await sendEmail(email, "Verify Your Email - BaltiMart", html);
 
     return res.json({
       success: true,
@@ -362,11 +357,6 @@ const registerUser = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
-
-
-
-
-
 
 // Route for admin login
 // const adminLogin = async (req, res) => {
@@ -521,7 +511,7 @@ const adminLogin = async (req, res) => {
       const token = jwt.sign(
         { id: admin._id, role: admin.role },
         process.env.JWT_SECRET,
-        { expiresIn: "7d" }
+        { expiresIn: "7d" },
       );
 
       return res.json({
@@ -563,7 +553,7 @@ const adminLogin = async (req, res) => {
     const token = jwt.sign(
       { id: vendor._id, role: vendor.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     res.json({
@@ -571,7 +561,6 @@ const adminLogin = async (req, res) => {
       token,
       role: vendor.role,
     });
-
   } catch (error) {
     res.json({
       success: false,
@@ -579,7 +568,6 @@ const adminLogin = async (req, res) => {
     });
   }
 };
-
 
 // Get user info by ID
 const getUserById = async (req, res) => {
@@ -609,7 +597,7 @@ const updateUser = async (req, res) => {
     const updatedUser = await userModel.findByIdAndUpdate(
       id,
       { name, email, profilePic },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedUser) {
@@ -662,7 +650,6 @@ const verifyOtp = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
-
 
 const resendOtp = async (req, res) => {
   try {

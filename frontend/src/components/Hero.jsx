@@ -38,8 +38,8 @@ const Hero = () => {
             </h1>
             <p className="text-gray-600 text-sm sm:text-base lg:text-lg max-w-xl mx-auto lg:mx-0">
               Step into fashion that speaks your style. From men’s, women’s, and
-              kids’ wear to timeless essentials — ShopNow brings you the perfect
-              collection.
+              kids’ wear to timeless essentials — BaltiMart brings you the
+              perfect collection.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link

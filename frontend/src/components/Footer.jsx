@@ -62,7 +62,7 @@ const Footer = () => {
       <div className="">
         <hr className="" />
         <p className="py-5 text-sm text-center ">
-          Copyright 2025@ ShopNow.com - All Right Reserved
+          Copyright 2025@ BaltiMart.com - All Right Reserved
         </p>
       </div>
     </div>

@@ -26,7 +26,7 @@ export const sendOrderEmail = async (email, orderId, amount, items) => {
         <td style="padding:10px; text-align:center;">${item.quantity}</td>
         <td style="padding:10px; text-align:right;">Rs. ${item.price}</td>
       </tr>
-    `
+    `,
       )
       .join("");
 
@@ -34,9 +34,9 @@ export const sendOrderEmail = async (email, orderId, amount, items) => {
     // HTML Email Template
     // ----------------------------
     const mailOptions = {
-      from: `ShopNow <${process.env.EMAIL_USER}>`,
+      from: `BaltiMart <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: `ShopNow - Order Confirmation #${orderId}`,
+      subject: `BaltiMart - Order Confirmation #${orderId}`,
       html: `
         <div style="
           width:100%;
@@ -58,7 +58,7 @@ export const sendOrderEmail = async (email, orderId, amount, items) => {
             </h2>
             
             <p style="text-align:center; font-size:16px;">
-              Thank you for ordering from <strong>ShopNow</strong>!
+              Thank you for ordering from <strong>BaltiMart</strong>!
             </p>
 
             <hr style="margin:20px 0;">
@@ -101,12 +101,12 @@ export const sendOrderEmail = async (email, orderId, amount, items) => {
                 border-radius:6px;
                 font-weight:bold;
               ">
-                Visit ShopNow
+                Visit BaltiMart
               </a>
             </div>
 
             <p style="text-align:center; margin-top:20px; color:#888;">
-              © ${new Date().getFullYear()} ShopNow. All rights reserved.
+              © ${new Date().getFullYear()} BaltiMart. All rights reserved.
             </p>
 
           </div>

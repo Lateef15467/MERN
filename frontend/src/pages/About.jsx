@@ -19,7 +19,7 @@ const About = () => {
           <img
             src={assets.about_img}
             className="w-full md:max-w-[450px] rounded-2xl shadow-lg transform transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl"
-            alt="About ShopNow"
+            alt="About BaltiMart"
           />
           <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-500"></div>
         </div>
@@ -27,7 +27,7 @@ const About = () => {
         {/* Text Section */}
         <div className="flex flex-col justify-center gap-6 md:w-2/4 text-gray-600 leading-relaxed">
           <p>
-            Welcome to <b className="text-black">ShopNow</b> — your trusted
+            Welcome to <b className="text-black">BaltiMart</b> — your trusted
             destination for high-quality products and a smooth shopping
             experience. From stylish clothing to modern essentials, we combine
             affordability with convenience to make your online shopping journey
@@ -36,8 +36,8 @@ const About = () => {
           <p>
             We take pride in delivering only the best. Every order is handled
             with care, ensuring fast delivery, secure payments, and top-tier
-            service. At <i>ShopNow</i>, customer satisfaction isn’t just a goal
-            — it’s our promise.
+            service. At <i>BaltiMart</i>, customer satisfaction isn’t just a
+            goal — it’s our promise.
           </p>
 
           <div>
@@ -61,7 +61,7 @@ const About = () => {
       <div className="text-center my-20 px-6">
         <Title text1={"Why"} text2={" Choose Us"} />
         <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
-          Discover what makes <b>ShopNow</b> stand out — quality, convenience,
+          Discover what makes <b>BaltiMart</b> stand out — quality, convenience,
           and care that redefine your shopping experience.
         </p>
 

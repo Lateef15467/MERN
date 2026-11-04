@@ -203,7 +203,7 @@ const Navbar = () => {
           {/* Admin Panel in mobile menu */}
           {user?.role === "admin" && (
             <a
-              href="https://shopnow-admins.vercel.app/login"
+              href="https://BaltiMart-admins.vercel.app/login"
               target="_blank"
               className="py-3 pl-6 border-b hover:bg-gray-100 hover:text-black transition-all duration-300"
             >

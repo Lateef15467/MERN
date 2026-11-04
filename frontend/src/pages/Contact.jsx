@@ -64,7 +64,7 @@ const Contact = () => {
               <FaUsers className="text-[#0B132B]" /> Join Our Team
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              At <b>ShopNow</b>, we welcome fresh talent and passionate
+              At <b>BaltiMart</b>, we welcome fresh talent and passionate
               learners. Whether you’re a student or a recent graduate, this is
               your chance to gain real experience, build skills, and grow with
               us.
@@ -73,10 +73,10 @@ const Contact = () => {
             <p className="mt-3 text-gray-600">
               Send your CV to{" "}
               <a
-                href="mailto:careers@ShopNow.com"
+                href="mailto:careers@BaltiMart.com"
                 className="text-[#FCA311] hover:underline"
               >
-                careers@ShopNow.com
+                careers@BaltiMart.com
               </a>{" "}
               and start your journey today!
             </p>

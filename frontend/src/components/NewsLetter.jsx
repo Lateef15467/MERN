@@ -31,7 +31,7 @@ const NewsLetter = () => {
         Join our community and be the first to know about{" "}
         <b>exclusive deals, new arrivals,</b> and <b>special offers</b>. Sign up
         today and enjoy <b>50% off</b> your first purchase. Shop smarter with{" "}
-        <i>ShopNow</i>!
+        <i>BaltiMart</i>!
       </p>
 
       {!submitted ? (
