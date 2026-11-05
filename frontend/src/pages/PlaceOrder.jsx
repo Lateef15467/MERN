@@ -77,6 +77,7 @@ const PlaceOrder = () => {
             );
 
             if (response.data.success) {
+              toast.success("Order Confirmed Successfully! 🎉");
               setCartItems({});
               navigate("/orders");
             } else {
