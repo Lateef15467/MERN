@@ -2,121 +2,149 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
 export const sendOrderEmail = async (email, orderId, amount, items) => {
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    // ----------------------------
-    // Generate dynamic product rows
-    // ----------------------------
-    const productRows = items
+    const productDetails = items
       .map(
         (item) => `
-      <tr style="border-bottom:1px solid #eee;">
-        <td style="padding:10px; text-align:center;">
-          <img src="${item.image}" width="60" height="60" style="border-radius:8px;" />
-        </td>
-        <td style="padding:10px;">${item.name}</td>
-        <td style="padding:10px; text-align:center;">${item.quantity}</td>
-        <td style="padding:10px; text-align:right;">Rs. ${item.price}</td>
-      </tr>
-    `,
+          ${item.name}
+          Quantity: ${item.quantity}
+          Price: Rs. ${item.price}
+        `,
       )
-      .join("");
+      .join("\n");
 
-    // ----------------------------
-    // HTML Email Template
-    // ----------------------------
+    const orderDate = new Date().toLocaleString();
+
     const mailOptions = {
-      from: `BaltiMart <${process.env.EMAIL_USER}>`,
+      from: `"BaltiMart" <${process.env.EMAIL_USER}>`,
+      replyTo: process.env.EMAIL_USER,
       to: email,
-      subject: `BaltiMart - Order Confirmation #${orderId}`,
+      subject: `Order Confirmation - BaltiMart #${orderId}`,
+
+      // Plain text version
+      text: `
+Hello,
+
+Thank you for placing an order with BaltiMart.
+
+Your order has been successfully received.
+
+Order Information
+-------------------------
+Order ID: ${orderId}
+Order Date: ${orderDate}
+
+Ordered Products
+-------------------------
+${productDetails}
+
+Total Amount: Rs. ${amount}
+
+You can visit our website:
+https://baltimart.vercel.app/
+
+Thank you for shopping with BaltiMart.
+
+BaltiMart Team
+      `,
+
+      // Simple HTML version
       html: `
         <div style="
-          width:100%;
-          background:#f7f7f7;
-          padding:20px 0;
-          font-family:Arial, sans-serif;
+          max-width: 560px;
+          margin: 20px auto;
+          padding: 24px;
+          font-family: Arial, sans-serif;
+          color: #333;
+          background: #ffffff;
+          border: 1px solid #eeeeee;
+          line-height: 1.6;
         ">
-          <div style="
-            max-width:600px;
-            background:white;
-            margin:auto;
-            padding:20px;
-            border-radius:10px;
-            box-shadow:0 0 10px rgba(0,0,0,0.1);
-          ">
-            
-            <h2 style="color:#2c3e50; text-align:center;">
-              Your Order is Confirmed 🎉
-            </h2>
-            
-            <p style="text-align:center; font-size:16px;">
-              Thank you for ordering from <strong>BaltiMart</strong>!
-            </p>
 
-            <hr style="margin:20px 0;">
+          <h2 style="color: #222;">
+            BaltiMart
+          </h2>
 
-            <h3>📦 Order Details</h3>
+          <p>Hello,</p>
 
-            <p><strong>Order ID:</strong> ${orderId}</p>
-            <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+          <p>
+            Thank you for placing an order with BaltiMart.
+            Your order has been successfully received.
+          </p>
 
-            <h3 style="margin-top:20px;">🛍️ Ordered Items</h3>
+          <h3>Order Information</h3>
 
-            <table width="100%" style="border-collapse:collapse;">
-              <tr style="background:#f2f2f2;">
-                <th style="padding:10px;">Image</th>
-                <th style="padding:10px;">Product</th>
-                <th style="padding:10px;">Qty</th>
-                <th style="padding:10px;">Price</th>
+          <p>
+            <strong>Order ID:</strong> ${orderId}<br>
+            <strong>Order Date:</strong> ${orderDate}
+          </p>
+
+          <h3>Ordered Products</h3>
+
+          <table width="100%" cellpadding="8"
+            style="border-collapse: collapse; text-align: left;">
+
+            <tr style="background: #f5f5f5;">
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Price</th>
+            </tr>
+
+            ${items
+              .map(
+                (item) => `
+              <tr style="border-bottom: 1px solid #eeeeee;">
+                <td>${item.name}</td>
+                <td>${item.quantity}</td>
+                <td>Rs. ${item.price}</td>
               </tr>
+            `,
+              )
+              .join("")}
 
-              ${productRows}
-            </table>
+          </table>
 
-            <hr style="margin:20px 0;">
+          <h3 style="margin-top: 20px;">
+            Total Amount: Rs. ${amount}
+          </h3>
 
-            <h3 style="text-align:right; color:#16a34a;">
-              Total Amount: Rs. ${amount}
-            </h3>
+          <p>
+            Thank you for choosing BaltiMart.
+          </p>
 
-            <p style="margin-top:20px;">
-              We will notify you once your order is shipped.  
-              You can contact support anytime.
-            </p>
+          <p>
+            Website:
+            <a href="https://baltimart.vercel.app/">
+              https://baltimart.vercel.app/
+            </a>
+          </p>
 
-            <div style="text-align:center; margin-top:30px;">
-              <a href="https://baltimart.vercel.app/"target="_blank"  style="
-                background:#2563eb;
-                color:white;
-                padding:12px 20px;
-                text-decoration:none;
-                border-radius:6px;
-                font-weight:bold;
-              ">
-                Visit BaltiMart
-              </a>
-            </div>
+          <p>
+            Regards,<br>
+            BaltiMart Team
+          </p>
 
-            <p style="text-align:center; margin-top:20px; color:#888;">
-              © ${new Date().getFullYear()} BaltiMart. All rights reserved.
-            </p>
-
-          </div>
         </div>
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+
     console.log("Order email sent successfully!");
-  } catch (err) {
-    console.log("Email sending failed:", err.message);
+    console.log("Recipient:", email);
+    console.log("Message ID:", info.messageId);
+    console.log("Accepted:", info.accepted);
+    console.log("Rejected:", info.rejected);
+  } catch (error) {
+    console.error("Order email sending failed:", error.message);
   }
 };
