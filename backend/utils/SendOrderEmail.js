@@ -93,7 +93,7 @@ export const sendOrderEmail = async (email, orderId, amount, items) => {
             </p>
 
             <div style="text-align:center; margin-top:30px;">
-              <a href="#" style="
+              <a href="https://baltimart.vercel.app/"target="_blank"  style="
                 background:#2563eb;
                 color:white;
                 padding:12px 20px;
