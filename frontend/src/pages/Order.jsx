@@ -14,7 +14,7 @@ const Order = () => {
       const response = await axios.post(
         backendUrl + "/api/orders/userorders",
         {},
-        { headers: { token } }
+        { headers: { token } },
       );
 
       if (response.data.success) {
@@ -69,14 +69,14 @@ const Order = () => {
 
                 <p className="mt-2">
                   Date:
-                  <span className="text-gray-400">
-                    {new Date(item.date).toDateString()}
+                  <span className="text-gray-400 ml-1">
+                    {new Date(item.date).toLocaleString()}
                   </span>
                 </p>
 
                 <p className="mt-2">
                   Payment:
-                  <span className="text-gray-400">{item.paymentMethod}</span>
+                  <span className="text-gray-400"> {item.paymentMethod}</span>
                 </p>
               </div>
             </div>
