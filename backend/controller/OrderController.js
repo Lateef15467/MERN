@@ -11,6 +11,16 @@ export const placeOrder = async (req, res) => {
   try {
     const { userId, items, amount, address } = req.body;
 
+    // Get registered user's email
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "User not found. Please login again.",
+      });
+    }
+
     const orderData = {
       userId,
       items,
@@ -28,11 +38,10 @@ export const placeOrder = async (req, res) => {
     // Clear user's cart
     await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
-    // -------------------------------
-    // 👉 SEND ORDER CONFIRMATION EMAIL
-    // -------------------------------
+    // Send order confirmation email to registered email
     try {
-      await sendOrderEmail(address.email, newOrder._id, amount, items);
+      await sendOrderEmail(user.email, newOrder._id, amount, items);
+      console.log("Order email sent to:", user.email);
     } catch (emailErr) {
       console.log("Order email error:", emailErr.message);
     }
@@ -71,7 +80,7 @@ export const updateStatus = async (req, res) => {
 
     let payment = false;
 
-    // ✅ Only Delivered means payment done (COD)
+    // Only Delivered means payment done (COD)
     if (status === "Delivered") {
       payment = true;
     }
@@ -86,6 +95,7 @@ export const updateStatus = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
 export const deleteOrder = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,6 +116,7 @@ export const deleteOrder = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 /* -------------------------- Easypaisa Order -------------------------- */
 export const placeOrderEasypaise = async (req, res) => {
   try {
@@ -235,6 +246,7 @@ export const jazzcashResponse = async (req, res) => {
     res.redirect("https://BaltiMartf.vercel.app/payment-error");
   }
 };
+
 export const jazzcashIPN = async (req, res) => {
   try {
     console.log("📩 JazzCash IPN:", req.body);

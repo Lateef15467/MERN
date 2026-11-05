@@ -21,13 +21,12 @@ const PlaceOrder = () => {
     products,
   } = useContext(ShopContext);
 
+  // Email is no longer collected during checkout
   const [formData, setformData] = useState({
     firstName: "",
     lastName: "",
-    email: "",
     street: "",
     city: "",
-
     phone: "",
   });
 
@@ -40,10 +39,14 @@ const PlaceOrder = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
+
     setLoading(true);
 
     try {
       let orderItems = [];
+
       for (const items in cartItems) {
         for (const item in cartItems[items]) {
           if (cartItems[items][item] > 0) {
@@ -82,7 +85,6 @@ const PlaceOrder = () => {
               navigate("/orders");
             } else {
               toast.error(response.data.message);
-              setLoading(false);
             }
           } catch (error) {
             console.log("COD Error:", error.message);
@@ -92,12 +94,14 @@ const PlaceOrder = () => {
           }
 
           break;
+
+        // Easypaisa
         case "easypaise":
           toast.error("EasyPaisa not implemented yet");
           setLoading(false);
           break;
 
-        // inside PlaceOrder component switch "jazzcash" case
+        // JazzCash
         case "jazzcash":
           try {
             const response = await axios.post(
@@ -108,17 +112,20 @@ const PlaceOrder = () => {
 
             if (response.data.success) {
               const html = response.data.html;
+
               if (html) {
-                // open new tab and post the HTML (auto-submit will redirect to JazzCash)
                 const win = window.open("", "_blank");
-                win.document.write(html);
-                win.document.close();
-                // DO NOT clear cart or navigate away yet — wait for callback
+
+                if (win) {
+                  win.document.write(html);
+                  win.document.close();
+                } else {
+                  toast.error("Please allow pop-ups for JazzCash payment");
+                }
               } else if (response.data.redirectURL) {
                 window.location.href = response.data.redirectURL;
               } else {
                 toast.error("Failed to initiate JazzCash payment");
-                setLoading(false);
               }
             } else {
               toast.error(response.data.message || "JazzCash init failed");
@@ -134,10 +141,13 @@ const PlaceOrder = () => {
 
         default:
           toast.error("Please select a valid payment method");
+          setLoading(false);
           break;
       }
     } catch (error) {
       console.log(error.message);
+      toast.error("Something went wrong while placing your order");
+      setLoading(false);
     }
   };
 
@@ -146,11 +156,12 @@ const PlaceOrder = () => {
       onSubmit={onSubmitHandler}
       className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t"
     >
-      {/* left side */}
+      {/* Left side */}
       <div className="flex flex-col gap-4 w-full sm:max-w-[480px]">
         <div className="tex-xl sm:text-2xl my-3">
           <Title text1={"Delivery"} text2={" Information"} />
         </div>
+
         <div className="flex gap-3">
           <input
             required
@@ -161,6 +172,7 @@ const PlaceOrder = () => {
             type="text"
             placeholder="First name"
           />
+
           <input
             required
             onChange={onChangeHandler}
@@ -171,15 +183,7 @@ const PlaceOrder = () => {
             placeholder="Last name"
           />
         </div>
-        <input
-          required
-          onChange={onChangeHandler}
-          name="email"
-          value={formData.email}
-          className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-          type="email"
-          placeholder="email"
-        />
+
         <input
           required
           onChange={onChangeHandler}
@@ -189,6 +193,7 @@ const PlaceOrder = () => {
           type="text"
           placeholder="street"
         />
+
         <div className="flex gap-3">
           <input
             required
@@ -212,17 +217,16 @@ const PlaceOrder = () => {
         />
       </div>
 
-      {/* right side */}
-
+      {/* Right side */}
       <div className="mt-8">
         <div className="mt-8 min-w-80">
           <CartTotal />
         </div>
+
         <div className="mt-12">
           <Title text1={"Payment"} text2={" Method"} />
 
-          {/* payment method select */}
-
+          {/* Payment method select */}
           <div className="flex gap-3 flex-col lg:flex-row">
             <div
               onClick={() => setmethod("easypaise")}
@@ -233,8 +237,10 @@ const PlaceOrder = () => {
                   method === "easypaise" ? "bg-green-400" : ""
                 }`}
               ></p>
-              <img src={assets.easypaise_logo} className="h-5 mx-4 " alt="" />
+
+              <img src={assets.easypaise_logo} className="h-5 mx-4" alt="" />
             </div>
+
             <div
               onClick={() => setmethod("jazzcash")}
               className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
@@ -244,12 +250,14 @@ const PlaceOrder = () => {
                   method === "jazzcash" ? "bg-green-400" : ""
                 }`}
               ></p>
+
               <img
                 src={assets.jazzcash_logo}
                 className="h-5 mx-4 pr-4"
                 alt=""
               />
             </div>
+
             <div
               onClick={() => setmethod("cod")}
               className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
@@ -259,17 +267,20 @@ const PlaceOrder = () => {
                   method === "cod" ? "bg-green-400" : ""
                 }`}
               ></p>
-              <p className=" text-gray-500 text-sm font-medium mx-4">
+
+              <p className="text-gray-500 text-sm font-medium mx-4">
                 Cash on delivery
               </p>
             </div>
           </div>
+
           <div className="w-full text-end mt-8">
             <button
               type="submit"
               disabled={loading}
               onClick={(e) => {
                 e.preventDefault();
+
                 if (loading) return;
 
                 const allFilled = Object.values(formData).every(
@@ -284,8 +295,12 @@ const PlaceOrder = () => {
                 onSubmitHandler(e);
               }}
               className={`px-16 py-3 text-sm flex items-center justify-center gap-2
-    ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-black text-white"}
-  `}
+                ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-black text-white"
+                }
+              `}
             >
               {loading ? (
                 <>
