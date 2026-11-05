@@ -97,45 +97,47 @@ const PlaceOrder = () => {
 
         // Easypaisa
         case "easypaise":
-          toast.error("EasyPaisa not implemented yet");
+          toast.error("EasyPaisa not available yet");
           setLoading(false);
           break;
 
-        // JazzCash
+        // jazzcash
         case "jazzcash":
-          try {
-            const response = await axios.post(
-              backendUrl + "/api/orders/initiateJazzcash",
-              orderData,
-              { headers: { token } },
-            );
+          toast.error("jazzcash not available yet");
+          setLoading(false);
+          // try {
+          //   const response = await axios.post(
+          //     backendUrl + "/api/orders/initiatejazzcash",
+          //     orderData,
+          //     { headers: { token } },
+          //   );
 
-            if (response.data.success) {
-              const html = response.data.html;
+          //   if (response.data.success) {
+          //     const html = response.data.html;
 
-              if (html) {
-                const win = window.open("", "_blank");
+          //     if (html) {
+          //       const win = window.open("", "_blank");
 
-                if (win) {
-                  win.document.write(html);
-                  win.document.close();
-                } else {
-                  toast.error("Please allow pop-ups for JazzCash payment");
-                }
-              } else if (response.data.redirectURL) {
-                window.location.href = response.data.redirectURL;
-              } else {
-                toast.error("Failed to initiate JazzCash payment");
-              }
-            } else {
-              toast.error(response.data.message || "JazzCash init failed");
-            }
-          } catch (err) {
-            console.error("JazzCash frontend error:", err);
-            toast.error("JazzCash initialization error");
-          } finally {
-            setLoading(false);
-          }
+          //       if (win) {
+          //         win.document.write(html);
+          //         win.document.close();
+          //       } else {
+          //         toast.error("Please allow pop-ups for jazzcash payment");
+          //       }
+          //     } else if (response.data.redirectURL) {
+          //       window.location.href = response.data.redirectURL;
+          //     } else {
+          //       toast.error("Failed to initiate jazzcash payment");
+          //     }
+          //   } else {
+          //     toast.error(response.data.message || "jazzcash init failed");
+          //   }
+          // } catch (err) {
+          //   console.error("jazzcash frontend error:", err);
+          //   toast.error("jazzcash initialization error");
+          // } finally {
+          //   setLoading(false);
+          // }
 
           break;
 

@@ -1,6 +1,6 @@
 import orderModel from "../models/OrderModel.js";
 import userModel from "../models/userModel.js";
-import { generateJazzcashHash } from "../utils/jazzcashHelper.js";
+import { generatejazzcashHash } from "../utils/jazzcashHelper.js";
 import { sendOrderEmail } from "../utils/SendOrderEmail.js";
 
 import dotenv from "dotenv";
@@ -145,8 +145,8 @@ export const placeOrderEasypaise = async (req, res) => {
   }
 };
 
-/* -------------------------- JazzCash Initiate -------------------------- */
-export const initiateJazzcash = async (req, res) => {
+/* -------------------------- jazzcash Initiate -------------------------- */
+export const initiatejazzcash = async (req, res) => {
   try {
     const { userId, items, amount, address } = req.body;
     const transactionId = "T" + Date.now();
@@ -174,16 +174,16 @@ export const initiateJazzcash = async (req, res) => {
       pp_Version: "1.1",
       pp_TxnType: "MWALLET",
       pp_Language: "EN",
-      pp_MerchantID: process.env.JAZZCASH_MERCHANT_ID,
-      pp_Password: process.env.JAZZCASH_PASSWORD,
-      pp_IPNURL: process.env.JAZZCASH_IPN_URL,
+      pp_MerchantID: process.env.jazzcash_MERCHANT_ID,
+      pp_Password: process.env.jazzcash_PASSWORD,
+      pp_IPNURL: process.env.jazzcash_IPN_URL,
       pp_TxnRefNo: transactionId,
       pp_Amount: String(Math.round(amount * 100)),
       pp_TxnCurrency: "PKR",
       pp_TxnDateTime: formattedDate,
       pp_BillReference: "BillRef",
       pp_Description: "E-commerce order payment",
-      pp_ReturnURL: process.env.JAZZCASH_RETURN_URL,
+      pp_ReturnURL: process.env.jazzcash_RETURN_URL,
       ppmpf_1: userId || "",
       ppmpf_2: "Ecommerce",
       ppmpf_3: "Order",
@@ -191,9 +191,9 @@ export const initiateJazzcash = async (req, res) => {
       ppmpf_5: "12345",
     };
 
-    postData.pp_SecureHash = generateJazzcashHash(postData);
+    postData.pp_SecureHash = generatejazzcashHash(postData);
 
-    const paymentUrl = process.env.JAZZCASH_PAYMENT_URL;
+    const paymentUrl = process.env.jazzcash_PAYMENT_URL;
 
     const inputs = Object.entries(postData)
       .map(([k, v]) => `<input type="hidden" name="${k}" value="${v}" />`)
@@ -221,7 +221,7 @@ export const initiateJazzcash = async (req, res) => {
   }
 };
 
-/* -------------------------- JazzCash Callback -------------------------- */
+/* -------------------------- jazzcash Callback -------------------------- */
 export const jazzcashResponse = async (req, res) => {
   try {
     const code = req.body.pp_ResponseCode || req.body.PP_ResponseCode;
@@ -249,7 +249,7 @@ export const jazzcashResponse = async (req, res) => {
 
 export const jazzcashIPN = async (req, res) => {
   try {
-    console.log("📩 JazzCash IPN:", req.body);
+    console.log("📩 jazzcash IPN:", req.body);
 
     const responseCode = req.body.pp_ResponseCode;
     const txnRefNo = req.body.pp_TxnRefNo;

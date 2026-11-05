@@ -25,7 +25,7 @@ connectCloudinary();
 app.use(cors());
 app.use(express.json());
 
-// JazzCash callback sends x-www-form-urlencoded form data.
+// jazzcash callback sends x-www-form-urlencoded form data.
 // Must be BEFORE route that handles /api/orders/jazzcash/response
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,10 +38,8 @@ app.use("/api/supplier", supplierRouter);
 // added furman
 app.use("/api/vendor", vendorRouter);
 
-
 // Health check
 app.get("/", (req, res) => res.send("API Working"));
 
 // Start
 app.listen(port, () => console.log("Server started on port: " + port));
-

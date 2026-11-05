@@ -2,8 +2,8 @@ import crypto from "crypto";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const generateJazzcashHash = (data) => {
-  const integritySalt = process.env.JAZZCASH_INTEGRITY_SALT || "";
+export const generatejazzcashHash = (data) => {
+  const integritySalt = process.env.jazzcash_INTEGRITY_SALT || "";
 
   const orderedKeys = [
     "pp_Amount",

@@ -3,7 +3,7 @@ import express from "express";
 import {
   placeOrder,
   placeOrderEasypaise,
-  initiateJazzcash,
+  initiatejazzcash,
   jazzcashResponse,
   allOrders,
   userOrders,
@@ -27,9 +27,9 @@ orderRouter.post("/userorders", authUser, userOrders);
 
 // Payments
 orderRouter.post("/placeEasypaisa", authUser, placeOrderEasypaise);
-orderRouter.post("/initiateJazzcash", authUser, initiateJazzcash);
+orderRouter.post("/initiatejazzcash", authUser, initiatejazzcash);
 
-// JazzCash callback (public endpoint, no auth)
+// jazzcash callback (public endpoint, no auth)
 orderRouter.post("/jazzcash/response", jazzcashResponse);
 orderRouter.post("/jazzcash/ipn", jazzcashIPN);
 
