@@ -103,6 +103,13 @@ const Navbar = () => {
           onClick={() => {
             setshowsearch(true);
             navigate("/collection");
+
+            setTimeout(() => {
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }, 100);
           }}
           src={assets.search_icon}
           alt="Search"
