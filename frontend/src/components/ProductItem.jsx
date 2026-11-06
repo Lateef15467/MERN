@@ -1,11 +1,33 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import axios from "axios";
 import { ShopContext } from "../context/ShopContext";
 import { Link } from "react-router-dom";
+import StarRating from "./StarRating";
 
 const ProductItem = ({ id, image, name, price, inStock }) => {
-  const { currency } = useContext(ShopContext);
+  const { currency, backendUrl } = useContext(ShopContext);
+  const [rating, setRating] = useState({ average: 0, count: 0 });
 
   const isOutOfStock = !inStock;
+
+  // Load average rating for this product
+  useEffect(() => {
+    let cancelled = false;
+    const loadRating = async () => {
+      try {
+        const { data } = await axios.get(
+          `${backendUrl}/api/review/summary/${id}`,
+        );
+        if (data.success && !cancelled) setRating(data.summary);
+      } catch (error) {
+        // rating is optional; ignore errors
+      }
+    };
+    if (backendUrl && id) loadRating();
+    return () => {
+      cancelled = true;
+    };
+  }, [backendUrl, id]);
 
   return (
     <div
@@ -29,6 +51,12 @@ const ProductItem = ({ id, image, name, price, inStock }) => {
 
       {/* Product Name */}
       <p className="pt-3 pb-1 text-sm">{name}</p>
+
+      {/* Rating */}
+      <div className="flex items-center gap-1 pb-1">
+        <StarRating value={rating.average} size={14} />
+        <span className="text-xs text-gray-500">({rating.count})</span>
+      </div>
 
       {/* Product Price */}
       <p className="text-sm font-medium">

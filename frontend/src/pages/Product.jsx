@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
-import { assets } from "../assets/frontend_assets/assets";
 import RelatedProduct from "../components/RelatedProduct";
+import ReviewSection from "../components/ReviewSection";
+import StarRating from "../components/StarRating";
 
 const Product = () => {
   const { productId } = useParams();
@@ -10,6 +11,7 @@ const Product = () => {
   const [producData, setproductData] = useState(false);
   const [image, setimage] = useState("");
   const [size, setsize] = useState("");
+  const [ratingSummary, setRatingSummary] = useState({ average: 0, count: 0 });
 
   const fetchProductData = async () => {
     products.map((item) => {
@@ -50,14 +52,19 @@ const Product = () => {
 
         <div className="flex-1">
           <h1 className="font-medium text-2xl mt-2">{producData.name}</h1>
-          <div className="flex items-center gap-1 mt-2">
-            <img src={assets.star_icon} className="w-3 5" alt="" />
-            <img src={assets.star_icon} className="w-3 5" alt="" />
-            <img src={assets.star_icon} className="w-3 5" alt="" />
-            <img src={assets.star_icon} className="w-3 5" alt="" />
-            <img src={assets.star_dull_icon} className="w-3 5" alt="" />
-            <p className="pl-2 ">(122)</p>
+
+          {/* real rating from reviews */}
+          <div className="flex items-center gap-2 mt-2">
+            <StarRating value={ratingSummary.average} size={18} />
+            <p className="pl-1 text-sm">
+              {ratingSummary.count > 0
+                ? `${ratingSummary.average.toFixed(1)} (${ratingSummary.count} ${
+                    ratingSummary.count === 1 ? "review" : "reviews"
+                  })`
+                : "No reviews yet"}
+            </p>
           </div>
+
           <p className="mt-5 text-3xl font-medium">
             {currency}
             {producData.price}
@@ -137,8 +144,10 @@ const Product = () => {
         </div>
       </div>
 
-      {/* dislay related product */}
+      {/* ratings and reviews */}
+      <ReviewSection productId={productId} onSummaryChange={setRatingSummary} />
 
+      {/* display related product */}
       <RelatedProduct
         category={producData.category}
         subCategory={producData.subCategory}

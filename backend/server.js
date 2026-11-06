@@ -13,6 +13,7 @@ import cartRouter from "./routes/CartRoute.js";
 import orderRouter from "./routes/OrderRoute.js";
 import supplierRouter from "./routes/SupplierRoute.js";
 import vendorRouter from "./routes/vendorRoute.js";
+import reviewRouter from "./routes/reviewRoute.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -35,6 +36,7 @@ app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/supplier", supplierRouter);
+app.use("/api/review", reviewRouter);
 // added furman
 app.use("/api/vendor", vendorRouter);
 
