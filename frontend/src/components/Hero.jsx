@@ -37,9 +37,12 @@ const Hero = () => {
               <span className="text-indigo-600">Trends</span>
             </h1>
             <p className="text-gray-600 text-sm sm:text-base lg:text-lg max-w-xl mx-auto lg:mx-0">
-              Step into fashion that speaks your style. From men’s, women’s, and
-              kids’ wear to timeless essentials — BaltiMart brings you the
-              perfect collection.
+              Your trusted online shopping destination in Baltistan! Discover
+              everything you need, from everyday essentials to fashion,
+              electronics, and much more. Enjoy quality products, secure
+              shopping, and reliable service right at your doorstep. Shop with
+              confidence, save your time, and experience a better way to shop
+              with BaltiMart!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link

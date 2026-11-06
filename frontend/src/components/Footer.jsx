@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { assets } from "../assets/frontend_assets/assets";
+import { FaWhatsapp, FaEnvelope, FaPhone } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -18,17 +19,18 @@ const Footer = () => {
             />
           </Link>
           <p className="w-full md:w-40 text-gray-600">
-            This is a fully functional an e-commerce website application which
-            is built in mern stack.
+            BaltiMart is your trusted online shopping destination in Baltistan,
+            bringing quality products right to your doorstep. Shop easily,
+            explore a wide range of products, and enjoy a convenient shopping
+            experience from anywhere in the region.
           </p>
         </div>
+
         <div>
-          <p className="text-xl font-medium mb-5  ">Company</p>
+          <p className="text-xl font-medium mb-5">Company</p>
           <ul className="flex flex-col gap-1 text-gray-600">
             <li>
-              <Link
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              >
+              <Link to="/" onClick={() => window.scrollTo(0, 0)}>
                 Home
               </Link>
             </li>
@@ -49,21 +51,82 @@ const Footer = () => {
             </li>
           </ul>
         </div>
-        <div className=" ">
+
+        <div>
           <p className="text-xl font-medium mb-5">Get In Touch</p>
-          <ul className="flex flex-col gap-1 text-gray-600">
-            <li>+92 3412996639</li>
-            <li>lateef4262@gmail.com </li>
-            <li>+92 3467161715</li>
-            <li> zeeshanlahari786@gmail.com</li>
-            <li>+92 3555400378</li>
-            <li> asku0019@gmail.com</li>
+          <ul className="flex flex-col gap-3 text-gray-600">
+            <li>
+              <a
+                href="https://wa.me/923412996639"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-green-600 transition-all"
+              >
+                <FaWhatsapp className="text-green-500" />
+                +92 3412996639
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="mailto:lateef4262@gmail.com"
+                className="flex items-center gap-2 hover:text-blue-600 transition-all"
+              >
+                <FaEnvelope />
+                lateef4262@gmail.com
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="https://wa.me/923467161715"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-green-600 transition-all"
+              >
+                <FaWhatsapp className="text-green-500" />
+                +92 3467161715
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="mailto:zeeshanlahari786@gmail.com"
+                className="flex items-center gap-2 hover:text-blue-600 transition-all"
+              >
+                <FaEnvelope />
+                zeeshanlahari786@gmail.com
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="https://wa.me/923555400378"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-green-600 transition-all"
+              >
+                <FaWhatsapp className="text-green-500" />
+                +92 3555400378
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="mailto:asku0019@gmail.com"
+                className="flex items-center gap-2 hover:text-blue-600 transition-all"
+              >
+                <FaEnvelope />
+                asku0019@gmail.com
+              </a>
+            </li>
           </ul>
         </div>
       </div>
-      <div className="">
-        <hr className="" />
-        <p className="py-5 text-sm text-center ">
+
+      <div>
+        <hr />
+        <p className="py-5 text-sm text-center">
           Copyright 2025@ BaltiMart.com - All Right Reserved
         </p>
       </div>
