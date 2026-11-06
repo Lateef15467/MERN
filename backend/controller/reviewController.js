@@ -64,7 +64,11 @@ const addReview = async (req, res) => {
     );
 
     const summary = await buildSummary(productId);
-    return res.json({ success: true, message: "Review saved", summary });
+    return res.json({
+      success: true,
+      message: "Thank you for your review!",
+      summary,
+    });
   } catch (error) {
     console.log(error);
     return res.json({ success: false, message: error.message });

@@ -14,3 +14,51 @@ a.active hr {
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* BaltiMart Filter Scrollbar */
+.custom-filter-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #f97316 #f1f1f1;
+}
+
+.custom-filter-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-filter-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-filter-scroll::-webkit-scrollbar-thumb {
+  background: #f97316;
+  border-radius: 10px;
+}
+
+.custom-filter-scroll::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+}
+
+/* BaltiMart Filter Scrollbar */
+.custom-filter-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #f97316 #f1f1f1;
+}
+
+.custom-filter-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-filter-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-filter-scroll::-webkit-scrollbar-thumb {
+  background: #f97316;
+  border-radius: 10px;
+}
+
+.custom-filter-scroll::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+}

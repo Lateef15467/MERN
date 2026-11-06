@@ -21,7 +21,7 @@ const Order = ({ token }) => {
       const response = await axios.post(
         backendUrl + "/api/orders/list",
         {},
-        { headers: { token } }
+        { headers: { token } },
       );
 
       if (response.data.success) {
@@ -46,7 +46,7 @@ const Order = ({ token }) => {
           orderId,
           status: event.target.value,
         },
-        { headers: { token } }
+        { headers: { token } },
       );
 
       if (response.data.success) {
@@ -69,7 +69,7 @@ const Order = ({ token }) => {
     try {
       const response = await axios.delete(
         `${backendUrl}/api/orders/delete/${deleteId}`,
-        { headers: { token } }
+        { headers: { token } },
       );
 
       if (response.data.success) {
