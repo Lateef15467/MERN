@@ -73,10 +73,10 @@ const Login = () => {
   }, [token]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 px-4 py-8">
       <form
         onSubmit={onSubmitHandler}
-        className="w-full max-w-md bg-white shadow-2xl rounded-2xl px-8 py-10 flex flex-col gap-5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,0,0,0.1)]"
+        className="w-full max-w-md bg-white shadow-2xl rounded-2xl px-5 py-8 sm:px-8 sm:py-10 flex flex-col gap-5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,0,0,0.1)]"
       >
         <div className="text-center mb-2">
           <h1 className="text-3xl font-semibold text-gray-800">
