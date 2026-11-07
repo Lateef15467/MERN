@@ -100,7 +100,7 @@ const Footer = () => {
 
       <div>
         <hr />
-        <div className="flex justify-center gap-6 py-4 text-sm text-gray-600">
+        <div className="flex justify-center gap-6 pt-4 text-sm text-gray-600">
           <Link to="/privacy-policy" className="hover:text-black">
             Privacy Policy
           </Link>
@@ -108,7 +108,7 @@ const Footer = () => {
             Terms of Service
           </Link>
         </div>
-        <p className="py-5 text-sm text-center">
+        <p className="pt-2 pb-5 text-sm text-center">
           Copyright 2025@ BaltiMart.com - All Right Reserved
         </p>
       </div>

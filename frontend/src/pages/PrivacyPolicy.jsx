@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 // ====== EDIT THIS ======
 const SITE_NAME = "BaltiMart";
 const SITE_URL = "https://baltimart.vercel.app";
-const EMAIL = " lateef4262@gmail.com";
+const EMAIL = "YOUR_EMAIL@gmail.com";
 const LAST_UPDATED = "7 November 2026";
 // =======================
 
@@ -129,7 +129,7 @@ const PrivacyPolicy = () => {
 
       <Section title="Contact">
         <P>
-          Questions? Email us at{""}
+          Questions? Email us at{" "}
           <a href={`mailto:${EMAIL}`} className="underline hover:text-black">
             {EMAIL}
           </a>
