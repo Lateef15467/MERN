@@ -14,6 +14,7 @@ import orderRouter from "./routes/OrderRoute.js";
 import supplierRouter from "./routes/SupplierRoute.js";
 import vendorRouter from "./routes/vendorRoute.js";
 import reviewRouter from "./routes/reviewRoute.js";
+import socialAuthRouter from "./routes/socialAuthRoute.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -37,6 +38,7 @@ app.use("/api/cart", cartRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/supplier", supplierRouter);
 app.use("/api/review", reviewRouter);
+app.use("/api/auth", socialAuthRouter);
 // added furman
 app.use("/api/vendor", vendorRouter);
 

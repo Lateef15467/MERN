@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import SocialLogin from "../components/SocialLogin";
 
 const Login = () => {
   const [currentState, setcurrentState] = useState("Login");
@@ -124,6 +125,8 @@ const Login = () => {
             {showPassword ? "Hide" : "Show"}
           </span>
         </div>
+
+        <SocialLogin mode={currentState} />
 
         <div className="w-full flex justify-between text-sm text-gray-600 mt-[-4px]">
           <p
