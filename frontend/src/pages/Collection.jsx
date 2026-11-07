@@ -13,6 +13,9 @@ const Collection = () => {
   const [subCategory, setsubCategory] = useState([]);
   const [sortType, setsortType] = useState("relevant");
 
+  // Search mode: activated from Navbar
+  const isSearchMode = Boolean(showsearch);
+
   // Category options
   const categories = [
     "Men",
@@ -34,7 +37,7 @@ const Collection = () => {
     "Automotive",
   ];
 
-  // Product type options (matching Admin Add.jsx)
+  // Product types matching Admin Add.jsx
   const subCategories = [
     "Topwear",
     "Bottomwear",
@@ -86,10 +89,9 @@ const Collection = () => {
     let productsCopy = Array.isArray(products) ? [...products] : [];
 
     // Search filter
-    if (showsearch && search) {
-      productsCopy = productsCopy.filter(
-        (item) =>
-          item?.name && item.name.toLowerCase().includes(search.toLowerCase()),
+    if (showsearch && search?.trim()) {
+      productsCopy = productsCopy.filter((item) =>
+        item?.name?.toLowerCase().includes(search.trim().toLowerCase()),
       );
     }
 
@@ -129,9 +131,13 @@ const Collection = () => {
   };
 
   return (
-    <div className="pt-7 sm:pt-10">
+    <div className="pt-3 sm:pt-10">
       {/* COLLECTION HERO BANNER */}
-      <div className="relative mb-9 overflow-hidden rounded-3xl bg-[#172033] px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-12">
+      <div
+        className={`relative mb-9 overflow-hidden rounded-3xl bg-[#172033] px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-12 ${
+          isSearchMode ? "hidden sm:block" : ""
+        }`}
+      >
         <div className="absolute -right-16 -top-24 h-72 w-72 rounded-full bg-orange-500/20 blur-3xl" />
 
         <div className="absolute -bottom-24 left-1/3 h-60 w-60 rounded-full bg-indigo-500/20 blur-3xl" />
@@ -160,9 +166,13 @@ const Collection = () => {
       </div>
 
       {/* MAIN COLLECTION AREA */}
-      <div className="flex flex-col gap-7 lg:flex-row">
+      <div className="flex flex-col gap-5 lg:flex-row lg:gap-7">
         {/* FILTER SIDEBAR */}
-        <aside className="w-full self-start lg:sticky lg:top-24 lg:w-64 lg:shrink-0">
+        <aside
+          className={`w-full self-start lg:sticky lg:top-24 lg:w-64 lg:shrink-0 ${
+            isSearchMode ? "hidden lg:block" : ""
+          }`}
+        >
           <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
             {/* FILTER HEADER */}
             <button
@@ -265,12 +275,17 @@ const Collection = () => {
         {/* PRODUCTS SECTION */}
         <main className="min-w-0 flex-1">
           {/* TITLE AND SORT */}
-          <div className="mb-6 flex flex-col justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center">
+          <div className="mb-5 flex flex-col justify-between gap-3 border-b border-gray-200 pb-4 sm:mb-6 sm:flex-row sm:items-center sm:pb-5">
             <div>
-              <Title text1="Explore" text2="Collections" />
+              <Title
+                text1={isSearchMode ? "Search" : "Explore"}
+                text2={isSearchMode ? "Results" : "Collections"}
+              />
 
               <p className="mt-1 text-xs text-gray-500">
-                Discover products selected for you.
+                {isSearchMode && search
+                  ? `Results for "${search}"`
+                  : "Discover products selected for you."}
               </p>
             </div>
 
@@ -313,7 +328,7 @@ const Collection = () => {
 
           {/* PRODUCTS GRID */}
           {filterProducts.length > 0 ? (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-8 md:grid-cols-3 xl:grid-cols-4">
               {filterProducts.map((item) => (
                 <ProductItem
                   key={item._id}
@@ -327,7 +342,7 @@ const Collection = () => {
             </div>
           ) : (
             /* EMPTY STATE */
-            <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 text-center">
+            <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 text-center">
               <FiShoppingBag size={40} className="mb-4 text-gray-300" />
 
               <h3 className="text-lg font-bold text-gray-800">
@@ -336,7 +351,7 @@ const Collection = () => {
 
               <p className="mt-2 max-w-sm text-sm text-gray-500">
                 We couldn't find products matching your search or selected
-                filters. Try changing your filters.
+                filters. Try changing your search or filters.
               </p>
 
               <button
