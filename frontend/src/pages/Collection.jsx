@@ -7,16 +7,14 @@ import { FiFilter, FiShoppingBag, FiChevronDown } from "react-icons/fi";
 const Collection = () => {
   const { products, search, showsearch } = useContext(ShopContext);
 
-  const [showFilters, setshowFilters] = useState(true);
+  const [showFilters, setshowFilters] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subCategory, setsubCategory] = useState([]);
   const [sortType, setsortType] = useState("relevant");
 
-  // Search mode: activated from Navbar
   const isSearchMode = Boolean(showsearch);
 
-  // Category options
   const categories = [
     "Men",
     "Women",
@@ -37,7 +35,6 @@ const Collection = () => {
     "Automotive",
   ];
 
-  // Product types matching Admin Add.jsx
   const subCategories = [
     "Topwear",
     "Bottomwear",
@@ -130,58 +127,60 @@ const Collection = () => {
     setsortType("relevant");
   };
 
+  const activeFilterCount = category.length + subCategory.length;
+
   return (
-    <div className="pt-3 sm:pt-10">
-      {/* COLLECTION HERO BANNER */}
-      <div
-        className={`relative mb-9 overflow-hidden rounded-3xl bg-[#172033] px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-12 ${
-          isSearchMode ? "hidden sm:block" : ""
-        }`}
-      >
-        <div className="absolute -right-16 -top-24 h-72 w-72 rounded-full bg-orange-500/20 blur-3xl" />
+    <section className="mx-auto max-w-[1600px] px-3 pb-12 pt-5 sm:px-6 sm:pt-8 lg:px-10">
+      {/* Collection Banner */}
+      {!isSearchMode && (
+        <div className="relative mb-8 overflow-hidden rounded-2xl bg-gray-900 px-5 py-9 text-white sm:mb-10 sm:px-10 sm:py-12 lg:px-14">
+          <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-orange-500/20 blur-3xl" />
+          <div className="absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-orange-400/10 blur-3xl" />
 
-        <div className="absolute -bottom-24 left-1/3 h-60 w-60 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="relative z-10 flex flex-col items-center justify-between gap-7 sm:flex-row">
+            <div className="max-w-xl text-center sm:text-left">
+              <span className="mb-3 inline-block rounded-full border border-orange-400/30 bg-orange-500/10 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-orange-300 sm:text-xs">
+                Discover BaltiMart
+              </span>
 
-        <div className="relative z-10 flex flex-col items-center justify-between gap-7 sm:flex-row">
-          <div className="max-w-xl text-center sm:text-left">
-            <span className="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-orange-300">
-              Discover BaltiMart
-            </span>
+              <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
+                Find Your Next
+                <span className="block text-orange-400">Favorite Thing.</span>
+              </h1>
 
-            <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
-              Find Your Next
-              <span className="block text-orange-400">Favorite Thing.</span>
-            </h1>
+              <p className="mt-4 max-w-lg text-xs leading-6 text-gray-300 sm:text-sm sm:leading-7">
+                Explore a wide range of products for your everyday needs.
+                Discover more choices and enjoy convenient shopping in one
+                place.
+              </p>
+            </div>
 
-            <p className="mt-4 text-sm leading-7 text-gray-300 sm:text-base">
-              Explore a wide range of products for your everyday needs. Discover
-              more choices and enjoy convenient shopping in one place.
-            </p>
-          </div>
-
-          <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 sm:h-40 sm:w-40">
-            <FiShoppingBag className="text-orange-400" size={65} />
+            <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 sm:h-36 sm:w-36 lg:h-40 lg:w-40">
+              <FiShoppingBag className="text-orange-400" size={60} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* MAIN COLLECTION AREA */}
+      {/* Main Collection Area */}
       <div className="flex flex-col gap-5 lg:flex-row lg:gap-7">
-        {/* FILTER SIDEBAR */}
-        <aside
-          className={`w-full self-start lg:sticky lg:top-24 lg:w-64 lg:shrink-0 ${
-            isSearchMode ? "hidden lg:block" : ""
-          }`}
-        >
-          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-            {/* FILTER HEADER */}
+        {/* Filter Sidebar */}
+        <aside className="w-full shrink-0 self-start lg:sticky lg:top-24 lg:w-64">
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            {/* Filter Header */}
             <button
+              type="button"
               onClick={() => setshowFilters(!showFilters)}
-              className="flex w-full items-center justify-between bg-gray-900 px-5 py-4 text-white"
+              className="flex w-full items-center justify-between bg-gray-900 px-5 py-4 text-white transition-colors hover:bg-gray-800"
             >
-              <span className="flex items-center gap-2 font-semibold">
+              <span className="flex items-center gap-2 text-sm font-semibold">
                 <FiFilter size={18} />
                 Filter Products
+                {activeFilterCount > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 text-[10px] text-white">
+                    {activeFilterCount}
+                  </span>
+                )}
               </span>
 
               <FiChevronDown
@@ -191,27 +190,26 @@ const Collection = () => {
               />
             </button>
 
-            {/* SCROLLABLE FILTER CONTENT */}
+            {/* Filter Content */}
             <div
               className={`${
                 showFilters ? "block" : "hidden"
-              } lg:block max-h-[55vh] overflow-y-auto pr-2 custom-filter-scroll`}
+              } max-h-[55vh] overflow-y-auto lg:block`}
             >
-              {/* CATEGORY */}
+              {/* Categories */}
               <div className="border-b border-gray-100 p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-sm font-bold text-gray-900">Categories</p>
-
                   <span className="text-xs text-gray-400">
-                    {category.length > 0 ? category.length : "01"}
+                    {category.length} selected
                   </span>
                 </div>
 
-                <div className="space-y-3 text-sm text-gray-600">
+                <div className="space-y-3">
                   {categories.map((item) => (
                     <label
                       key={item}
-                      className="flex cursor-pointer items-center gap-3 transition hover:text-orange-500"
+                      className="flex cursor-pointer items-center gap-3 text-xs text-gray-600 transition-colors hover:text-orange-500 sm:text-sm"
                     >
                       <input
                         onChange={toggleCategory}
@@ -220,30 +218,28 @@ const Collection = () => {
                         className="h-4 w-4 cursor-pointer accent-orange-500"
                         value={item}
                       />
-
                       {item}
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* PRODUCT TYPE */}
+              {/* Product Types */}
               <div className="border-b border-gray-100 p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-sm font-bold text-gray-900">
                     Product Type
                   </p>
-
                   <span className="text-xs text-gray-400">
-                    {subCategory.length > 0 ? subCategory.length : "02"}
+                    {subCategory.length} selected
                   </span>
                 </div>
 
-                <div className="space-y-3 text-sm text-gray-600">
+                <div className="space-y-3">
                   {subCategories.map((item) => (
                     <label
                       key={item}
-                      className="flex cursor-pointer items-center gap-3 transition hover:text-orange-500"
+                      className="flex cursor-pointer items-center gap-3 text-xs text-gray-600 transition-colors hover:text-orange-500 sm:text-sm"
                     >
                       <input
                         onChange={togglesubCategory}
@@ -252,18 +248,18 @@ const Collection = () => {
                         className="h-4 w-4 cursor-pointer accent-orange-500"
                         value={item}
                       />
-
                       {item}
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* CLEAR FILTERS */}
-              <div className="border-t border-gray-100 p-5">
+              {/* Clear Filters */}
+              <div className="p-5">
                 <button
+                  type="button"
                   onClick={clearFilters}
-                  className="w-full rounded-lg border border-gray-200 py-2.5 text-sm font-semibold text-gray-600 transition hover:border-orange-500 hover:bg-orange-50 hover:text-orange-500"
+                  className="w-full rounded-lg border border-gray-200 py-2.5 text-sm font-semibold text-gray-600 transition-all hover:border-orange-400 hover:bg-orange-50 hover:text-orange-600"
                 >
                   Clear All Filters
                 </button>
@@ -272,9 +268,9 @@ const Collection = () => {
           </div>
         </aside>
 
-        {/* PRODUCTS SECTION */}
+        {/* Products Section */}
         <main className="min-w-0 flex-1">
-          {/* TITLE AND SORT */}
+          {/* Heading and Sorting */}
           <div className="mb-5 flex flex-col justify-between gap-3 border-b border-gray-200 pb-4 sm:mb-6 sm:flex-row sm:items-center sm:pb-5">
             <div>
               <Title
@@ -282,7 +278,7 @@ const Collection = () => {
                 text2={isSearchMode ? "Results" : "Collections"}
               />
 
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-gray-500 sm:text-sm">
                 {isSearchMode && search
                   ? `Results for "${search}"`
                   : "Discover products selected for you."}
@@ -297,7 +293,7 @@ const Collection = () => {
               <select
                 value={sortType}
                 onChange={(e) => setsortType(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 outline-none transition focus:border-orange-400 sm:w-auto"
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-medium text-gray-700 outline-none transition focus:border-orange-400 sm:flex-none sm:px-4 sm:text-sm"
               >
                 <option value="relevant">Most Relevant</option>
                 <option value="low-high">Price: Low to High</option>
@@ -306,9 +302,9 @@ const Collection = () => {
             </div>
           </div>
 
-          {/* PRODUCT COUNT */}
+          {/* Product Count */}
           <div className="mb-5 flex items-center justify-between">
-            <p className="text-sm text-gray-500">
+            <p className="text-xs text-gray-500 sm:text-sm">
               Showing{" "}
               <span className="font-bold text-gray-900">
                 {filterProducts.length}
@@ -316,19 +312,20 @@ const Collection = () => {
               products
             </p>
 
-            {(category.length > 0 || subCategory.length > 0) && (
+            {activeFilterCount > 0 && (
               <button
+                type="button"
                 onClick={clearFilters}
-                className="text-xs font-semibold text-orange-500 hover:underline"
+                className="text-xs font-semibold text-orange-500 transition-colors hover:text-orange-600 hover:underline"
               >
                 Reset filters
               </button>
             )}
           </div>
 
-          {/* PRODUCTS GRID */}
+          {/* Products Grid */}
           {filterProducts.length > 0 ? (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-8 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-7 md:grid-cols-3 xl:grid-cols-4">
               {filterProducts.map((item) => (
                 <ProductItem
                   key={item._id}
@@ -341,22 +338,25 @@ const Collection = () => {
               ))}
             </div>
           ) : (
-            /* EMPTY STATE */
-            <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 text-center">
-              <FiShoppingBag size={40} className="mb-4 text-gray-300" />
+            /* Empty State */
+            <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-10 text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-50">
+                <FiShoppingBag size={30} className="text-orange-400" />
+              </div>
 
               <h3 className="text-lg font-bold text-gray-800">
                 No Products Found
               </h3>
 
-              <p className="mt-2 max-w-sm text-sm text-gray-500">
+              <p className="mt-2 max-w-sm text-xs leading-6 text-gray-500 sm:text-sm">
                 We couldn't find products matching your search or selected
                 filters. Try changing your search or filters.
               </p>
 
               <button
+                type="button"
                 onClick={clearFilters}
-                className="mt-5 rounded-full bg-gray-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
+                className="mt-5 rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-orange-600"
               >
                 Clear Filters
               </button>
@@ -364,7 +364,7 @@ const Collection = () => {
           )}
         </main>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -7,13 +7,30 @@ import Hero from "../components/Hero";
 
 const Home = () => {
   return (
-    <div>
-      <Hero></Hero>
-      <LatestCollection></LatestCollection>
-      <BestSeller></BestSeller>
-      <OurPolicy />
-      <NewsLetter></NewsLetter>
-    </div>
+    <main className="w-full overflow-hidden bg-white">
+      {/* Hero Banner */}
+      <Hero />
+
+      {/* Latest Products */}
+      <section className="w-full">
+        <LatestCollection />
+      </section>
+
+      {/* Best Selling Products */}
+      <section className="w-full">
+        <BestSeller />
+      </section>
+
+      {/* Shopping Policies */}
+      <section className="w-full">
+        <OurPolicy />
+      </section>
+
+      {/* Newsletter Subscription */}
+      <section className="w-full">
+        <NewsLetter />
+      </section>
+    </main>
   );
 };
 

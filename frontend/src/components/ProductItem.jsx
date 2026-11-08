@@ -13,17 +13,23 @@ const ProductItem = ({ id, image, name, price, inStock }) => {
   // Load average rating for this product
   useEffect(() => {
     let cancelled = false;
+
     const loadRating = async () => {
       try {
         const { data } = await axios.get(
           `${backendUrl}/api/review/summary/${id}`,
         );
-        if (data.success && !cancelled) setRating(data.summary);
+
+        if (data.success && !cancelled) {
+          setRating(data.summary);
+        }
       } catch (error) {
-        // rating is optional; ignore errors
+        // Rating is optional; ignore errors
       }
     };
+
     if (backendUrl && id) loadRating();
+
     return () => {
       cancelled = true;
     };
@@ -31,46 +37,63 @@ const ProductItem = ({ id, image, name, price, inStock }) => {
 
   return (
     <div
-      className={`text-gray-700 relative ${isOutOfStock ? "opacity-50" : ""}`}
+      className={`group relative h-full overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg ${
+        isOutOfStock ? "opacity-75" : ""
+      }`}
     >
-      {/* CLICKABLE LINK — ALWAYS WORKS */}
       <Link
         to={`/product/${id}`}
-        className="absolute inset-0 z-10"
+        className="absolute inset-0 z-10 rounded-xl"
+        aria-label={`View ${name}`}
         onClick={() => window.scrollTo(0, 0)}
       />
 
       {/* Product Image */}
-      <div className="overflow-hidden">
+      <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
         <img
-          src={image[0]}
-          className="hover:scale-110 transition ease-in-out"
+          src={image?.[0]}
           alt={name}
+          loading="lazy"
+          className={`h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105 ${
+            isOutOfStock ? "grayscale-[25%]" : ""
+          }`}
         />
+
+        {/* Stock Badge */}
+        <div className="absolute left-2 top-2">
+          {isOutOfStock ? (
+            <span className="rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+              Out of Stock
+            </span>
+          ) : (
+            <span className="rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-green-700 shadow-sm">
+              In Stock
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Product Name */}
-      <p className="pt-3 pb-1 text-sm">{name}</p>
+      {/* Product Details */}
+      <div className="p-3 sm:p-4">
+        <p className="mb-2 line-clamp-2 min-h-[40px] text-sm font-medium leading-5 text-gray-800 transition-colors group-hover:text-orange-600 sm:text-base">
+          {name}
+        </p>
 
-      {/* Rating */}
-      <div className="flex items-center gap-1 pb-1">
-        <StarRating value={rating.average} size={14} />
-        <span className="text-xs text-gray-500">({rating.count})</span>
+        {/* Rating */}
+        <div className="mb-2 flex items-center gap-1.5">
+          <StarRating value={rating.average} size={14} />
+          <span className="text-xs text-gray-500">({rating.count})</span>
+        </div>
+
+        {/* Price */}
+        <div className="flex flex-wrap items-baseline gap-1">
+          <span className="text-base font-bold text-gray-900 sm:text-lg">
+            {currency}
+            {price}
+          </span>
+          <span className="text-xs font-medium text-gray-500">PKR</span>
+        </div>
       </div>
-
-      {/* Product Price */}
-      <p className="text-sm font-medium">
-        {currency}
-        {price}
-        <span className="text-sm"> Pkr</span>
-      </p>
-
-      {/* Stock Status */}
-      {isOutOfStock ? (
-        <p className="text-red-600 text-sm font-semibold mt-1">Out of Stock</p>
-      ) : (
-        <p className="text-green-600 text-sm mt-1">In Stock</p>
-      )}
     </div>
   );
 };

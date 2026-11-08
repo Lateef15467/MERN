@@ -5,35 +5,79 @@ import NewsLetter from "../components/NewsLetter";
 import { FaShieldAlt, FaSmile, FaShoppingBag } from "react-icons/fa";
 
 const About = () => {
+  const features = [
+    {
+      icon: <FaShieldAlt />,
+      title: "Trusted Shopping",
+      description:
+        "Your trust matters to us. We focus on reliable service, product quality, and a transparent shopping experience with every order.",
+    },
+    {
+      icon: <FaShoppingBag />,
+      title: "Shopping Made Easy",
+      description:
+        "Explore a variety of products in one place, order from anywhere, and enjoy the convenience of online shopping from your home.",
+    },
+    {
+      icon: <FaSmile />,
+      title: "Customer Satisfaction",
+      description:
+        "Every customer matters. We strive to provide helpful support, convenient delivery, and a shopping experience you can rely on.",
+    },
+  ];
+
   return (
-    <div className="animate-fadeIn">
-      {/* About Us Title */}
-      <div className="text-xl text-center pt-10 border-t border-gray-200 font-semibold">
-        <Title text1={"About"} text2={" Us"} />
-      </div>
+    <div className="overflow-hidden bg-white">
+      {/* About Us Heading */}
+      <section className="border-t border-gray-100 px-4 pb-3 pt-10 text-center sm:pt-14">
+        <Title text1="About" text2=" Us" />
+        <p className="mx-auto mt-1 max-w-xl text-xs leading-6 text-gray-500 sm:text-sm">
+          Discover the story behind BaltiMart and our commitment to making
+          shopping easier across Baltistan.
+        </p>
+      </section>
 
       {/* About Content */}
-      <div className="my-16 flex flex-col md:flex-row gap-12 items-center px-6 md:px-12">
-        {/* Image */}
-        <div className="relative group">
+      <section className="mx-auto my-12 flex max-w-7xl flex-col items-center gap-9 px-4 sm:my-16 sm:px-8 md:flex-row md:gap-12 lg:gap-16 lg:px-12">
+        {/* About Image */}
+        <div className="group relative w-full md:w-1/2">
+          <div className="absolute -bottom-3 -right-3 h-full w-full rounded-2xl bg-orange-100" />
+
           <img
             src={assets.about_img}
-            className="w-full md:max-w-[450px] rounded-2xl shadow-lg transform transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl"
             alt="About BaltiMart"
+            loading="lazy"
+            className="relative z-10 aspect-[5/4] w-full rounded-2xl object-cover shadow-md transition-transform duration-500 group-hover:scale-[1.02]"
           />
-          <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-500"></div>
+
+          <div className="absolute left-4 top-4 z-20 rounded-lg bg-white/95 px-4 py-2 shadow-md sm:left-6 sm:top-6">
+            <p className="text-xs font-bold tracking-wide text-orange-600">
+              BALTIMART
+            </p>
+            <p className="text-[10px] text-gray-500">Shopping made easier</p>
+          </div>
         </div>
 
-        {/* Text Section */}
-        <div className="flex flex-col justify-center gap-6 md:w-2/4 text-gray-600 leading-relaxed">
-          <p>
-            Welcome to <b className="text-black">BaltiMart</b> — a local online
-            shopping platform designed to bring a convenient and modern shopping
-            experience to the people of Baltistan. We bring a variety of
-            products together in one place, making it easier to discover and
-            shop for everyday needs without the hassle of visiting multiple
-            stores.
-          </p>
+        {/* About Text */}
+        <div className="flex w-full flex-col justify-center gap-5 text-sm leading-7 text-gray-600 md:w-1/2 sm:text-base">
+          <div>
+            <span className="mb-2 inline-block rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
+              Who We Are
+            </span>
+
+            <h2 className="mb-3 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
+              Bringing Shopping Closer to You
+            </h2>
+
+            <p>
+              Welcome to <b className="text-gray-900">BaltiMart</b> — a local
+              online shopping platform designed to bring a convenient and modern
+              shopping experience to the people of Baltistan. We bring a variety
+              of products together in one place, making it easier to discover
+              and shop for everyday needs without the hassle of visiting
+              multiple stores.
+            </p>
+          </div>
 
           <p>
             From everyday essentials to fashion, electronics, home accessories,
@@ -43,9 +87,13 @@ const About = () => {
             confidence and convenience.
           </p>
 
-          <div>
-            <b className="text-gray-800 text-lg">Our Mission</b>
-            <p className="mt-2">
+          {/* Mission */}
+          <div className="rounded-xl border-l-4 border-orange-500 bg-orange-50/70 p-4 sm:p-5">
+            <h3 className="mb-2 text-lg font-bold text-gray-900">
+              Our Mission
+            </h3>
+
+            <p className="text-sm leading-6 text-gray-600">
               Our mission is to simplify shopping across Baltistan through
               technology. We aim to connect customers with a wide range of
               products, support convenient online purchasing, and bring shopping
@@ -54,60 +102,65 @@ const About = () => {
             </p>
           </div>
 
-          {/* Call-to-Action */}
+          {/* Explore Button */}
           <button
             onClick={() => (window.location.href = "/collection")}
-            className="mt-4 w-fit border border-black px-8 py-3 text-sm font-medium rounded-full hover:bg-black hover:text-white transition-all duration-500 hover:shadow-[0_0_12px_rgba(0,0,0,0.3)]"
+            className="mt-2 w-full rounded-full bg-orange-500 px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-orange-600 hover:shadow-md sm:w-fit"
           >
             Explore Products
+            <span className="ml-2">→</span>
           </button>
         </div>
-      </div>
+      </section>
 
-      {/* Why Choose Us Section */}
-      <div className="text-center my-20 px-6">
-        <Title text1={"Why"} text2={" Choose Us"} />
-        <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
-          At <b>BaltiMart</b>, we believe shopping should be simple, affordable,
-          and reliable. We are committed to bringing a better online shopping
-          experience to the people of Baltistan.
-        </p>
+      {/* Why Choose Us */}
+      <section className="bg-gray-50 px-4 py-14 sm:px-8 sm:py-20 lg:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center">
+            <Title text1="Why" text2=" Choose Us" />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-          {/* Quality Assurance */}
-          <div className="border rounded-2xl px-8 py-10 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 flex flex-col items-center gap-5">
-            <FaShieldAlt className="text-4xl text-black" />
-            <b className="text-lg">Trusted Shopping</b>
-            <p className="text-gray-600 text-sm text-center leading-relaxed">
-              Your trust matters to us. We focus on reliable service, product
-              quality, and a transparent shopping experience with every order.
+            <h2 className="mt-2 text-xl font-bold text-gray-900 sm:text-2xl">
+              Why Shop With BaltiMart?
+            </h2>
+
+            <p className="mx-auto mt-3 max-w-2xl text-xs leading-6 text-gray-500 sm:text-sm">
+              At <b className="text-gray-700">BaltiMart</b>, we believe shopping
+              should be simple, affordable, and reliable. We are committed to
+              bringing a better online shopping experience to the people of
+              Baltistan.
             </p>
           </div>
 
-          {/* Convenience */}
-          <div className="border rounded-2xl px-8 py-10 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 flex flex-col items-center gap-5">
-            <FaShoppingBag className="text-4xl text-black" />
-            <b className="text-lg">Shopping Made Easy</b>
-            <p className="text-gray-600 text-sm text-center leading-relaxed">
-              Explore a variety of products in one place, order from anywhere,
-              and enjoy the convenience of online shopping from your home.
-            </p>
-          </div>
+          {/* Feature Cards */}
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-7">
+            {features.map((feature, index) => (
+              <div
+                key={feature.title}
+                className="group flex flex-col items-center rounded-2xl border border-gray-100 bg-white px-6 py-9 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg sm:px-8"
+              >
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-50 text-2xl text-orange-500 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white">
+                  {feature.icon}
+                </div>
 
-          {/* Customer Service */}
-          <div className="border rounded-2xl px-8 py-10 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 flex flex-col items-center gap-5">
-            <FaSmile className="text-4xl text-black" />
-            <b className="text-lg">Customer Satisfaction</b>
-            <p className="text-gray-600 text-sm text-center leading-relaxed">
-              Every customer matters. We strive to provide helpful support,
-              convenient delivery, and a shopping experience you can rely on.
-            </p>
+                <h3 className="mb-3 text-base font-bold text-gray-900 sm:text-lg">
+                  {feature.title}
+                </h3>
+
+                <p className="text-sm leading-6 text-gray-500">
+                  {feature.description}
+                </p>
+
+                <div className="mt-6 h-1 w-10 rounded-full bg-orange-400 transition-all duration-300 group-hover:w-16" />
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Newsletter Section */}
-      <NewsLetter />
+      {/* Newsletter */}
+      <div className="py-10 sm:py-14">
+        <NewsLetter />
+      </div>
     </div>
   );
 };

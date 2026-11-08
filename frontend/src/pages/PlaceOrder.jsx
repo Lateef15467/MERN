@@ -5,6 +5,12 @@ import { assets } from "../assets/frontend_assets/assets";
 import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import {
+  FaMapMarkerAlt,
+  FaCreditCard,
+  FaMoneyBillWave,
+  FaCheckCircle,
+} from "react-icons/fa";
 
 const PlaceOrder = () => {
   const [method, setmethod] = useState("cod");
@@ -21,7 +27,6 @@ const PlaceOrder = () => {
     products,
   } = useContext(ShopContext);
 
-  // Email is no longer collected during checkout
   const [formData, setformData] = useState({
     firstName: "",
     lastName: "",
@@ -41,6 +46,13 @@ const PlaceOrder = () => {
     e.preventDefault();
 
     if (loading) return;
+
+    const allFilled = Object.values(formData).every((val) => val.trim() !== "");
+
+    if (!allFilled) {
+      toast.error("Please fill all required fields");
+      return;
+    }
 
     setLoading(true);
 
@@ -70,8 +82,7 @@ const PlaceOrder = () => {
       };
 
       switch (method) {
-        // COD
-        case "cod":
+        case "cod": {
           try {
             const response = await axios.post(
               backendUrl + "/api/orders/place",
@@ -89,230 +100,334 @@ const PlaceOrder = () => {
           } catch (error) {
             console.log("COD Error:", error.message);
             toast.error("Failed to place COD order");
-          } finally {
-            setLoading(false);
           }
 
           break;
+        }
 
-        // Easypaisa
         case "easypaise":
           toast.error("EasyPaisa not available yet");
-          setLoading(false);
           break;
 
-        // jazzcash
         case "jazzcash":
           toast.error("jazzcash not available yet");
-          setLoading(false);
-          // try {
-          //   const response = await axios.post(
-          //     backendUrl + "/api/orders/initiatejazzcash",
-          //     orderData,
-          //     { headers: { token } },
-          //   );
-
-          //   if (response.data.success) {
-          //     const html = response.data.html;
-
-          //     if (html) {
-          //       const win = window.open("", "_blank");
-
-          //       if (win) {
-          //         win.document.write(html);
-          //         win.document.close();
-          //       } else {
-          //         toast.error("Please allow pop-ups for jazzcash payment");
-          //       }
-          //     } else if (response.data.redirectURL) {
-          //       window.location.href = response.data.redirectURL;
-          //     } else {
-          //       toast.error("Failed to initiate jazzcash payment");
-          //     }
-          //   } else {
-          //     toast.error(response.data.message || "jazzcash init failed");
-          //   }
-          // } catch (err) {
-          //   console.error("jazzcash frontend error:", err);
-          //   toast.error("jazzcash initialization error");
-          // } finally {
-          //   setLoading(false);
-          // }
-
           break;
 
         default:
           toast.error("Please select a valid payment method");
-          setLoading(false);
           break;
       }
     } catch (error) {
       console.log(error.message);
       toast.error("Something went wrong while placing your order");
+    } finally {
       setLoading(false);
     }
   };
 
+  const paymentMethods = [
+    {
+      id: "easypaise",
+      name: "EasyPaisa",
+      image: assets.easypaise_logo,
+      available: false,
+    },
+    {
+      id: "jazzcash",
+      name: "JazzCash",
+      image: assets.jazzcash_logo,
+      available: false,
+    },
+    {
+      id: "cod",
+      name: "Cash on Delivery",
+      image: null,
+      available: true,
+    },
+  ];
+
+  const inputClass =
+    "w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm text-gray-700 outline-none transition-all placeholder:text-gray-400 focus:border-[#FCA311] focus:bg-white focus:ring-4 focus:ring-orange-100";
+
   return (
     <form
       onSubmit={onSubmitHandler}
-      className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t"
+      className="min-h-[80vh] border-t border-gray-100 bg-white px-4 pb-16 pt-8 sm:px-6 sm:pt-12 lg:px-10"
     >
-      {/* Left side */}
-      <div className="flex flex-col gap-4 w-full sm:max-w-[480px]">
-        <div className="tex-xl sm:text-2xl my-3">
-          <Title text1={"Delivery"} text2={" Information"} />
+      <div className="mx-auto max-w-7xl">
+        {/* Page Heading */}
+        <div className="mb-8 sm:mb-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#FCA311]">
+            Almost There
+          </p>
+          <h1 className="mt-2 text-2xl font-bold text-[#0B132B] sm:text-3xl">
+            Complete Your Order
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">
+            Enter your delivery details and choose your preferred payment
+            method.
+          </p>
         </div>
 
-        <div className="flex gap-3">
-          <input
-            required
-            onChange={onChangeHandler}
-            name="firstName"
-            value={formData.firstName}
-            className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="First name"
-          />
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.3fr_0.8fr] lg:gap-12">
+          {/* Left Side - Delivery Information */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
+            <div className="mb-7 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-[#FCA311]">
+                <FaMapMarkerAlt size={19} />
+              </div>
 
-          <input
-            required
-            onChange={onChangeHandler}
-            name="lastName"
-            value={formData.lastName}
-            className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="Last name"
-          />
-        </div>
-
-        <input
-          required
-          onChange={onChangeHandler}
-          name="street"
-          value={formData.street}
-          className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-          type="text"
-          placeholder="street"
-        />
-
-        <div className="flex gap-3">
-          <input
-            required
-            onChange={onChangeHandler}
-            name="city"
-            value={formData.city}
-            className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="City"
-          />
-        </div>
-
-        <input
-          onChange={onChangeHandler}
-          name="phone"
-          value={formData.phone}
-          className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-          type="number"
-          placeholder="Phone"
-          required
-        />
-      </div>
-
-      {/* Right side */}
-      <div className="mt-8">
-        <div className="mt-8 min-w-80">
-          <CartTotal />
-        </div>
-
-        <div className="mt-12">
-          <Title text1={"Payment"} text2={" Method"} />
-
-          {/* Payment method select */}
-          <div className="flex gap-3 flex-col lg:flex-row">
-            <div
-              onClick={() => setmethod("easypaise")}
-              className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
-            >
-              <p
-                className={`min-w-3.5 h-3.5 border rounded-full ${
-                  method === "easypaise" ? "bg-green-400" : ""
-                }`}
-              ></p>
-
-              <img src={assets.easypaise_logo} className="h-5 mx-4" alt="" />
+              <div>
+                <Title text1="Delivery" text2=" Information" />
+                <p className="mt-1 text-xs text-gray-400">
+                  Where should we deliver your order?
+                </p>
+              </div>
             </div>
 
-            <div
-              onClick={() => setmethod("jazzcash")}
-              className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
-            >
-              <p
-                className={`min-w-3.5 h-3.5 border rounded-full ${
-                  method === "jazzcash" ? "bg-green-400" : ""
-                }`}
-              ></p>
+            {/* Name Fields */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="firstName"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  First Name *
+                </label>
+                <input
+                  id="firstName"
+                  required
+                  onChange={onChangeHandler}
+                  name="firstName"
+                  value={formData.firstName}
+                  className={inputClass}
+                  type="text"
+                  placeholder="Enter first name"
+                  autoComplete="given-name"
+                />
+              </div>
 
-              <img
-                src={assets.jazzcash_logo}
-                className="h-5 mx-4 pr-4"
-                alt=""
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Last Name *
+                </label>
+                <input
+                  id="lastName"
+                  required
+                  onChange={onChangeHandler}
+                  name="lastName"
+                  value={formData.lastName}
+                  className={inputClass}
+                  type="text"
+                  placeholder="Enter last name"
+                  autoComplete="family-name"
+                />
+              </div>
+            </div>
+
+            {/* Street */}
+            <div className="mt-5">
+              <label
+                htmlFor="street"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Street Address *
+              </label>
+              <input
+                id="street"
+                required
+                onChange={onChangeHandler}
+                name="street"
+                value={formData.street}
+                className={inputClass}
+                type="text"
+                placeholder="House number, street or area"
+                autoComplete="street-address"
               />
             </div>
 
-            <div
-              onClick={() => setmethod("cod")}
-              className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
-            >
-              <p
-                className={`min-w-3.5 h-3.5 border rounded-full ${
-                  method === "cod" ? "bg-green-400" : ""
-                }`}
-              ></p>
+            {/* City */}
+            <div className="mt-5">
+              <label
+                htmlFor="city"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                City *
+              </label>
+              <input
+                id="city"
+                required
+                onChange={onChangeHandler}
+                name="city"
+                value={formData.city}
+                className={inputClass}
+                type="text"
+                placeholder="Enter your city"
+                autoComplete="address-level2"
+              />
+            </div>
 
-              <p className="text-gray-500 text-sm font-medium mx-4">
-                Cash on delivery
+            {/* Phone */}
+            <div className="mt-5">
+              <label
+                htmlFor="phone"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Phone Number *
+              </label>
+              <input
+                id="phone"
+                required
+                onChange={onChangeHandler}
+                name="phone"
+                value={formData.phone}
+                className={inputClass}
+                type="tel"
+                placeholder="+92 3XX XXXXXXX"
+                autoComplete="tel"
+              />
+              <p className="mt-2 text-xs text-gray-400">
+                Please provide a reachable number for delivery updates.
+              </p>
+            </div>
+
+            {/* Delivery Note */}
+            <div className="mt-7 flex items-start gap-3 rounded-xl bg-orange-50/70 p-4">
+              <FaCheckCircle className="mt-0.5 shrink-0 text-[#FCA311]" />
+              <p className="text-xs leading-6 text-gray-600">
+                Please make sure your delivery details are correct to help us
+                deliver your order smoothly.
               </p>
             </div>
           </div>
 
-          <div className="w-full text-end mt-8">
-            <button
-              type="submit"
-              disabled={loading}
-              onClick={(e) => {
-                e.preventDefault();
+          {/* Right Side - Summary and Payment */}
+          <div className="flex flex-col gap-6">
+            {/* Order Summary */}
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-[#FCA311]">
+                  <FaCreditCard size={18} />
+                </div>
 
-                if (loading) return;
+                <div>
+                  <h2 className="text-lg font-semibold text-[#0B132B]">
+                    Order Summary
+                  </h2>
+                  <p className="text-xs text-gray-400">
+                    Review your order total
+                  </p>
+                </div>
+              </div>
 
-                const allFilled = Object.values(formData).every(
-                  (val) => val.trim() !== "",
-                );
+              <CartTotal />
+            </div>
 
-                if (!allFilled) {
-                  toast.error("Please fill all required fields");
-                  return;
-                }
+            {/* Payment Methods */}
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+              <div className="mb-6">
+                <Title text1="Payment" text2=" Method" />
+                <p className="mt-2 text-xs text-gray-400">
+                  Select how you want to pay.
+                </p>
+              </div>
 
-                onSubmitHandler(e);
-              }}
-              className={`px-16 py-3 text-sm flex items-center justify-center gap-2
-                ${
+              <div className="flex flex-col gap-3">
+                {paymentMethods.map((payment) => {
+                  const selected = method === payment.id;
+
+                  return (
+                    <button
+                      key={payment.id}
+                      type="button"
+                      onClick={() => setmethod(payment.id)}
+                      aria-pressed={selected}
+                      className={`flex w-full items-center justify-between gap-3 rounded-xl border p-4 text-left transition-all duration-200 ${
+                        selected
+                          ? "border-[#FCA311] bg-orange-50/60 shadow-sm"
+                          : "border-gray-200 bg-white hover:border-orange-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                            selected
+                              ? "border-[#FCA311] bg-[#FCA311]"
+                              : "border-gray-300 bg-white"
+                          }`}
+                        >
+                          {selected && (
+                            <span className="h-2 w-2 rounded-full bg-white" />
+                          )}
+                        </span>
+
+                        {payment.image ? (
+                          <img
+                            src={payment.image}
+                            className="h-7 max-w-[105px] object-contain"
+                            alt={payment.name}
+                          />
+                        ) : (
+                          <FaMoneyBillWave
+                            className="shrink-0 text-[#FCA311]"
+                            size={23}
+                          />
+                        )}
+
+                        <span className="text-sm font-medium text-gray-700">
+                          {payment.name}
+                        </span>
+                      </div>
+
+                      {selected && (
+                        <FaCheckCircle
+                          className="shrink-0 text-[#FCA311]"
+                          size={17}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 rounded-xl bg-gray-50 p-4">
+                <p className="text-xs leading-6 text-gray-500">
+                  {method === "cod"
+                    ? "Pay in cash when your order is delivered."
+                    : method === "easypaise"
+                      ? "EasyPaisa is not available yet."
+                      : "JazzCash is not available yet."}
+                </p>
+              </div>
+
+              {/* Place Order Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className={`mt-6 flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-sm font-semibold transition-all duration-300 ${
                   loading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-black text-white"
-                }
-              `}
-            >
-              {loading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Processing...
-                </>
-              ) : (
-                "Place Order"
-              )}
-            </button>
+                    ? "cursor-not-allowed bg-gray-400 text-white"
+                    : "bg-[#0B132B] text-white shadow-md hover:bg-[#FCA311] hover:text-[#0B132B] hover:shadow-lg"
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    Processing Order...
+                  </>
+                ) : (
+                  "Place Order"
+                )}
+                {!loading && <span>→</span>}
+              </button>
+
+              <p className="mt-4 text-center text-xs leading-5 text-gray-400">
+                Your order details will be submitted securely.
+              </p>
+            </div>
           </div>
         </div>
       </div>
