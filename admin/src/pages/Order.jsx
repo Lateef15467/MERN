@@ -2,8 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
-import { assets } from "../assets/assets";
-
 import {
   FiPackage,
   FiSearch,
@@ -12,14 +10,10 @@ import {
   FiCheckCircle,
   FiClock,
   FiTruck,
-  FiX,
-  FiCalendar,
   FiPhone,
   FiMapPin,
-  FiCreditCard,
   FiShoppingBag,
   FiUser,
-  FiCheck,
   FiAlertTriangle,
 } from "react-icons/fi";
 
