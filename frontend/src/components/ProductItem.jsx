@@ -45,7 +45,6 @@ const ProductItem = ({ id, image, name, price, inStock }) => {
         to={`/product/${id}`}
         className="absolute inset-0 z-10 rounded-xl"
         aria-label={`View ${name}`}
-        onClick={() => window.scrollTo(0, 0)}
       />
 
       {/* Product Image */}
