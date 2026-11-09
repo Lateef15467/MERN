@@ -519,36 +519,112 @@ const Order = ({ token }) => {
                       </div>
 
                       {/* Products */}
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <FiShoppingBag size={17} className="text-gray-500" />
 
-                          <h3 className="text-sm font-bold text-gray-800">
-                            Ordered Products
-                          </h3>
+                      {/* Products */}
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <FiShoppingBag
+                              size={17}
+                              className="text-gray-500"
+                            />
+                            <h3 className="text-sm font-bold text-gray-800">
+                              Ordered Products
+                            </h3>
+                          </div>
+
+                          <span className="text-xs text-gray-500">
+                            {order.items?.length || 0} Products
+                          </span>
                         </div>
 
                         <div className="space-y-3">
-                          {order.items?.map((item, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between gap-3 bg-gray-50 rounded-xl p-3"
-                            >
-                              <div className="min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 break-words">
-                                  {item.name}
-                                </p>
+                          {order.items?.map((item, index) => {
+                            const productImage = Array.isArray(item.image)
+                              ? item.image[0]
+                              : item.image ||
+                                (Array.isArray(item.images)
+                                  ? item.images[0]
+                                  : item.images);
 
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Size: {item.size || "N/A"}
-                                </p>
+                            const quantity = Number(item.quantity || 1);
+                            const price = Number(item.price || 0);
+                            const subtotal = price * quantity;
+
+                            return (
+                              <div
+                                key={index}
+                                className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4"
+                              >
+                                <div className="flex gap-3">
+                                  {/* Product Image */}
+                                  <div className="w-20 h-24 shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-gray-100">
+                                    {productImage ? (
+                                      <img
+                                        src={productImage}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center">
+                                        <FiPackage
+                                          size={25}
+                                          className="text-gray-400"
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Product Information */}
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm font-bold text-gray-900 break-words">
+                                      {item.name || "Unknown Product"}
+                                    </h4>
+
+                                    <div className="grid grid-cols-2 gap-x-3 gap-y-2 mt-3">
+                                      <div>
+                                        <p className="text-xs text-gray-400">
+                                          Size
+                                        </p>
+                                        <p className="text-sm font-semibold text-gray-700">
+                                          {item.size || "N/A"}
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <p className="text-xs text-gray-400">
+                                          Quantity
+                                        </p>
+                                        <p className="text-sm font-semibold text-gray-700">
+                                          {quantity}
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <p className="text-xs text-gray-400">
+                                          Unit Price
+                                        </p>
+                                        <p className="text-sm font-semibold text-gray-700">
+                                          {currency}
+                                          {price.toFixed(2)}
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <p className="text-xs text-gray-400">
+                                          Subtotal
+                                        </p>
+                                        <p className="text-sm font-bold text-gray-900">
+                                          {currency}
+                                          {subtotal.toFixed(2)}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-
-                              <span className="shrink-0 text-xs font-semibold bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700">
-                                Qty: {item.quantity}
-                              </span>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
