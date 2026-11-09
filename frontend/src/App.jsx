@@ -22,6 +22,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import ScrollToTop from "./components/ScrollToTop";
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
       <ToastContainer></ToastContainer>
       <Navbar></Navbar>
       <SearchBar></SearchBar>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home></Home>}></Route>
         <Route path="/collection" element={<Collection></Collection>}></Route>
