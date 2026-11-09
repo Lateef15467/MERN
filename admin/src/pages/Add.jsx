@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { assets } from "../assets/assets";
 import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
@@ -7,12 +6,12 @@ import {
   FiUploadCloud,
   FiPackage,
   FiTag,
-  FiDollarSign,
   FiCheckCircle,
   FiStar,
   FiImage,
   FiPlus,
   FiX,
+  FiCheck,
 } from "react-icons/fi";
 
 // Category and related product types
@@ -56,7 +55,11 @@ const Add = ({ token }) => {
   const [inStock, setInStock] = useState(false);
   const [bestseller, setbestseller] = useState(false);
   const [Sizes, setSizes] = useState([]);
+
+  // Upload states
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadComplete, setUploadComplete] = useState(false);
 
   const availableSubCategories = CATEGORY_SUBCATEGORIES[category] || [];
 
@@ -87,15 +90,23 @@ const Add = ({ token }) => {
     );
   };
 
+  // Handle image selection
   const handleImageChange = (e, imageNumber) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setImages[imageNumber - 1](file);
+
+    // Reset upload status if an image changes
+    setUploadComplete(false);
+    setUploadProgress(0);
   };
 
+  // Remove selected image
   const removeImage = (imageNumber) => {
     setImages[imageNumber - 1](false);
+    setUploadComplete(false);
+    setUploadProgress(0);
   };
 
   const resetForm = () => {
@@ -114,6 +125,9 @@ const Add = ({ token }) => {
     setInStock(false);
     setbestseller(false);
     setSizes([]);
+
+    setUploadProgress(0);
+    setUploadComplete(false);
   };
 
   const onSubmitHandler = async (e) => {
@@ -135,6 +149,8 @@ const Add = ({ token }) => {
     }
 
     setLoading(true);
+    setUploadProgress(0);
+    setUploadComplete(false);
 
     try {
       const formData = new FormData();
@@ -158,16 +174,33 @@ const Add = ({ token }) => {
         formData,
         {
           headers: { token },
+
+          // Track actual request upload progress
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentage = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total,
+              );
+
+              setUploadProgress(percentage);
+            }
+          },
         },
       );
 
       if (response.data.success) {
+        setUploadProgress(100);
+        setUploadComplete(true);
         toast.success(response.data.message);
-        resetForm();
+
+        // Do not reset the form here.
+        // This keeps the Uploaded status visible.
       } else {
+        setUploadComplete(false);
         toast.error(response.data.message);
       }
     } catch (error) {
+      setUploadComplete(false);
       toast.error(error.response?.data?.message || error.message);
     } finally {
       setLoading(false);
@@ -222,6 +255,55 @@ const Add = ({ token }) => {
           </div>
 
           <div className="p-5 sm:p-7">
+            {/* Image selection summary */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <div>
+                <p className="text-sm font-semibold text-slate-700">
+                  Images Selected
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {images.filter(Boolean).length} of 4 images selected
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all"
+                    style={{
+                      width: `${(images.filter(Boolean).length / 4) * 100}%`,
+                    }}
+                  />
+                </div>
+
+                <span className="text-xs font-bold text-emerald-600">
+                  {images.filter(Boolean).length}/4
+                </span>
+              </div>
+            </div>
+
+            {/* Actual upload progress */}
+            {loading && (
+              <div className="mb-5 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold text-indigo-700">
+                    Uploading Images...
+                  </span>
+
+                  <span className="text-sm font-bold text-indigo-700">
+                    {uploadProgress}%
+                  </span>
+                </div>
+
+                <div className="w-full h-2.5 bg-indigo-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-indigo-600 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {images.map((img, index) => (
                 <div key={index} className="relative group">
@@ -229,24 +311,51 @@ const Add = ({ token }) => {
                     htmlFor={`image${index + 1}`}
                     className={`relative flex flex-col items-center justify-center w-full aspect-square rounded-2xl border-2 border-dashed cursor-pointer overflow-hidden transition-all ${
                       img
-                        ? "border-indigo-300 bg-indigo-50"
+                        ? "border-emerald-400 bg-emerald-50"
                         : "border-slate-200 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50/50"
                     }`}
                   >
                     {img ? (
-                      <img
-                        src={URL.createObjectURL(img)}
-                        alt={`Product ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+                      <>
+                        <img
+                          src={URL.createObjectURL(img)}
+                          alt={`Product ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Upload status: only during upload or after success */}
+                        {(loading || uploadComplete) && (
+                          <div
+                            className={`absolute bottom-0 left-0 right-0 text-white py-2 flex items-center justify-center gap-1.5 text-xs font-semibold ${
+                              uploadComplete
+                                ? "bg-emerald-600"
+                                : "bg-indigo-600"
+                            }`}
+                          >
+                            {uploadComplete ? (
+                              <>
+                                <FiCheck size={14} />
+                                Uploaded
+                              </>
+                            ) : (
+                              <>
+                                <span className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent" />
+                                Uploading {uploadProgress}%
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="flex flex-col items-center text-center p-3">
                         <div className="w-12 h-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-indigo-500 mb-3">
                           <FiUploadCloud size={23} />
                         </div>
+
                         <span className="text-sm font-semibold text-slate-600">
                           Upload Image
                         </span>
+
                         <span className="text-xs text-slate-400 mt-1">
                           Image {index + 1}
                         </span>
@@ -258,15 +367,18 @@ const Add = ({ token }) => {
                       accept="image/*"
                       hidden
                       id={`image${index + 1}`}
+                      disabled={loading}
                       onChange={(e) => handleImageChange(e, index + 1)}
                     />
                   </label>
 
+                  {/* Remove image button */}
                   {img && (
                     <button
                       type="button"
                       onClick={() => removeImage(index + 1)}
-                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-red-500 shadow-md flex items-center justify-center hover:bg-red-50 transition"
+                      disabled={loading}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-red-500 shadow-md flex items-center justify-center hover:bg-red-50 transition disabled:opacity-50"
                       title="Remove image"
                     >
                       <FiX size={17} />
@@ -378,6 +490,7 @@ const Add = ({ token }) => {
                 <span className="absolute left-4 top-[25px] -translate-y-1/2 text-slate-500 text-sm font-semibold">
                   {currency}
                 </span>
+
                 <input
                   type="number"
                   min="1"
@@ -441,6 +554,7 @@ const Add = ({ token }) => {
                   inStock ? "bg-emerald-500" : "bg-red-400"
                 }`}
               />
+
               <span className="text-sm text-slate-600">
                 Current status:{" "}
                 <strong
@@ -457,6 +571,7 @@ const Add = ({ token }) => {
                 <h3 className="text-sm font-semibold text-slate-800 mb-1">
                   Available Sizes
                 </h3>
+
                 <p className="text-xs text-slate-500 mb-4">
                   Select all sizes available for this product.
                 </p>
@@ -491,6 +606,7 @@ const Add = ({ token }) => {
                   <h3 className="text-sm font-semibold text-slate-800">
                     Mark as Bestseller
                   </h3>
+
                   <p className="text-xs text-slate-500 mt-1">
                     Highlight this product as a popular item.
                   </p>
@@ -504,6 +620,7 @@ const Add = ({ token }) => {
                   onChange={() => setbestseller(!bestseller)}
                   className="sr-only peer"
                 />
+
                 <div className="w-12 h-6 bg-slate-300 rounded-full peer peer-checked:bg-amber-500 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:shadow after:transition-all peer-checked:after:translate-x-6" />
               </label>
             </div>
