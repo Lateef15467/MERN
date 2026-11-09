@@ -56,10 +56,15 @@ const Add = ({ token }) => {
   const [bestseller, setbestseller] = useState(false);
   const [Sizes, setSizes] = useState([]);
 
-  // Upload states
+  // Individual image upload states
   const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadComplete, setUploadComplete] = useState(false);
+  const [imageProgress, setImageProgress] = useState([0, 0, 0, 0]);
+  const [imageStatus, setImageStatus] = useState([
+    "idle",
+    "idle",
+    "idle",
+    "idle",
+  ]);
 
   const availableSubCategories = CATEGORY_SUBCATEGORIES[category] || [];
 
@@ -71,13 +76,16 @@ const Add = ({ token }) => {
       : ["S", "M", "L", "XL", "XXL"];
 
   const images = [image1, image2, image3, image4];
+
   const setImages = [setImage1, setImage2, setImage3, setImage4];
 
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
+
     setcategory(selectedCategory);
 
     const types = CATEGORY_SUBCATEGORIES[selectedCategory] || [];
+
     setsubCategory(types[0] || "");
     setSizes([]);
   };
@@ -93,22 +101,40 @@ const Add = ({ token }) => {
   // Handle image selection
   const handleImageChange = (e, imageNumber) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
-    setImages[imageNumber - 1](file);
+    const index = imageNumber - 1;
 
-    // Reset upload status if an image changes
-    setUploadComplete(false);
-    setUploadProgress(0);
+    setImages[index](file);
+
+    setImageProgress((prev) =>
+      prev.map((value, i) => (i === index ? 0 : value)),
+    );
+
+    setImageStatus((prev) =>
+      prev.map((status, i) => (i === index ? "idle" : status)),
+    );
+
+    e.target.value = "";
   };
 
   // Remove selected image
   const removeImage = (imageNumber) => {
-    setImages[imageNumber - 1](false);
-    setUploadComplete(false);
-    setUploadProgress(0);
+    const index = imageNumber - 1;
+
+    setImages[index](false);
+
+    setImageProgress((prev) =>
+      prev.map((value, i) => (i === index ? 0 : value)),
+    );
+
+    setImageStatus((prev) =>
+      prev.map((status, i) => (i === index ? "idle" : status)),
+    );
   };
 
+  // Reset form
   const resetForm = () => {
     setname("");
     setdescription("");
@@ -126,14 +152,16 @@ const Add = ({ token }) => {
     setbestseller(false);
     setSizes([]);
 
-    setUploadProgress(0);
-    setUploadComplete(false);
+    setImageProgress([0, 0, 0, 0]);
+
+    setImageStatus(["idle", "idle", "idle", "idle"]);
   };
 
+  // Submit product and upload images individually
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    if (!image1 && !image2 && !image3 && !image4) {
+    if (!images.some(Boolean)) {
       toast.error("Please upload at least one product image");
       return;
     }
@@ -149,59 +177,116 @@ const Add = ({ token }) => {
     }
 
     setLoading(true);
-    setUploadProgress(0);
-    setUploadComplete(false);
+
+    setImageProgress([0, 0, 0, 0]);
+
+    setImageStatus(["idle", "idle", "idle", "idle"]);
+
+    let currentImageIndex = -1;
 
     try {
-      const formData = new FormData();
+      const uploadedImageUrls = [];
 
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("price", price);
-      formData.append("inStock", String(inStock));
-      formData.append("category", category);
-      formData.append("subCategory", subCategory);
-      formData.append("bestseller", String(bestseller));
-      formData.append("Sizes", JSON.stringify(Sizes));
+      // Upload images one by one
+      for (let index = 0; index < images.length; index++) {
+        const file = images[index];
 
-      if (image1) formData.append("image1", image1);
-      if (image2) formData.append("image2", image2);
-      if (image3) formData.append("image3", image3);
-      if (image4) formData.append("image4", image4);
+        if (!file) continue;
+
+        currentImageIndex = index;
+
+        setImageStatus((prev) =>
+          prev.map((status, i) => (i === index ? "uploading" : status)),
+        );
+
+        const formData = new FormData();
+
+        formData.append("image", file);
+
+        const response = await axios.post(
+          backendUrl + "/api/product/upload-image",
+          formData,
+          {
+            headers: {
+              token,
+            },
+
+            onUploadProgress: (progressEvent) => {
+              if (progressEvent.total) {
+                const percentage = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total,
+                );
+
+                setImageProgress((prev) =>
+                  prev.map((value, i) => (i === index ? percentage : value)),
+                );
+              }
+            },
+          },
+        );
+
+        if (!response.data.success || !response.data.imageUrl) {
+          throw new Error(
+            response.data.message || `Image ${index + 1} upload failed`,
+          );
+        }
+
+        uploadedImageUrls.push(response.data.imageUrl);
+
+        // Mark current image as uploaded
+        setImageProgress((prev) =>
+          prev.map((value, i) => (i === index ? 100 : value)),
+        );
+
+        setImageStatus((prev) =>
+          prev.map((status, i) => (i === index ? "uploaded" : status)),
+        );
+
+        currentImageIndex = -1;
+      }
+
+      // Save product after all images are uploaded
+      const productData = {
+        name,
+        description,
+        price,
+        inStock,
+        category,
+        subCategory,
+        bestseller,
+        Sizes,
+        imageUrls: uploadedImageUrls,
+      };
 
       const response = await axios.post(
         backendUrl + "/api/product/add",
-        formData,
+        productData,
         {
-          headers: { token },
-
-          // Track actual request upload progress
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total) {
-              const percentage = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total,
-              );
-
-              setUploadProgress(percentage);
-            }
+          headers: {
+            token,
           },
         },
       );
 
       if (response.data.success) {
-        setUploadProgress(100);
-        setUploadComplete(true);
         toast.success(response.data.message);
-
-        // Do not reset the form here.
-        // This keeps the Uploaded status visible.
       } else {
-        setUploadComplete(false);
         toast.error(response.data.message);
       }
     } catch (error) {
-      setUploadComplete(false);
-      toast.error(error.response?.data?.message || error.message);
+      console.log("Product upload error:", error);
+
+      if (currentImageIndex !== -1) {
+        setImageStatus((prev) =>
+          prev.map((status, i) => (i === currentImageIndex ? "error" : status)),
+        );
+      }
+
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Something went wrong",
+      );
     } finally {
       setLoading(false);
     }
@@ -248,6 +333,7 @@ const Add = ({ token }) => {
 
             <div>
               <h2 className="font-bold text-slate-800">Product Images</h2>
+
               <p className="text-xs text-slate-500 mt-0.5">
                 Upload up to four images. At least one image is required.
               </p>
@@ -261,6 +347,7 @@ const Add = ({ token }) => {
                 <p className="text-sm font-semibold text-slate-700">
                   Images Selected
                 </p>
+
                 <p className="text-xs text-slate-500 mt-1">
                   {images.filter(Boolean).length} of 4 images selected
                 </p>
@@ -282,28 +369,7 @@ const Add = ({ token }) => {
               </div>
             </div>
 
-            {/* Actual upload progress */}
-            {loading && (
-              <div className="mb-5 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-indigo-700">
-                    Uploading Images...
-                  </span>
-
-                  <span className="text-sm font-bold text-indigo-700">
-                    {uploadProgress}%
-                  </span>
-                </div>
-
-                <div className="w-full h-2.5 bg-indigo-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-indigo-600 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
+            {/* Individual image upload cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {images.map((img, index) => (
                 <div key={index} className="relative group">
@@ -323,24 +389,36 @@ const Add = ({ token }) => {
                           className="w-full h-full object-cover"
                         />
 
-                        {/* Upload status: only during upload or after success */}
-                        {(loading || uploadComplete) && (
+                        {/* Individual upload status */}
+                        {imageStatus[index] !== "idle" && (
                           <div
-                            className={`absolute bottom-0 left-0 right-0 text-white py-2 flex items-center justify-center gap-1.5 text-xs font-semibold ${
-                              uploadComplete
+                            className={`absolute bottom-0 left-0 right-0 text-white py-2 px-2 flex flex-col items-center justify-center gap-1 text-xs font-semibold ${
+                              imageStatus[index] === "uploaded"
                                 ? "bg-emerald-600"
-                                : "bg-indigo-600"
+                                : imageStatus[index] === "error"
+                                  ? "bg-red-600"
+                                  : "bg-indigo-600"
                             }`}
                           >
-                            {uploadComplete ? (
-                              <>
+                            {imageStatus[index] === "uploaded" ? (
+                              <span className="flex items-center gap-1">
                                 <FiCheck size={14} />
                                 Uploaded
-                              </>
+                              </span>
+                            ) : imageStatus[index] === "error" ? (
+                              <span>Upload Failed</span>
                             ) : (
                               <>
-                                <span className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent" />
-                                Uploading {uploadProgress}%
+                                <span>Uploading {imageProgress[index]}%</span>
+
+                                <div className="w-full h-1.5 bg-white/30 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-white rounded-full transition-all duration-200"
+                                    style={{
+                                      width: `${imageProgress[index]}%`,
+                                    }}
+                                  />
+                                </div>
                               </>
                             )}
                           </div>
@@ -403,6 +481,7 @@ const Add = ({ token }) => {
 
             <div>
               <h2 className="font-bold text-slate-800">Basic Information</h2>
+
               <p className="text-xs text-slate-500 mt-0.5">
                 Enter the product name and description.
               </p>
@@ -412,6 +491,7 @@ const Add = ({ token }) => {
           <div className="p-5 sm:p-7 space-y-5">
             <div>
               <label className={labelClass}>Product Name</label>
+
               <input
                 type="text"
                 required
@@ -424,6 +504,7 @@ const Add = ({ token }) => {
 
             <div>
               <label className={labelClass}>Product Description</label>
+
               <textarea
                 required
                 value={description}
@@ -445,6 +526,7 @@ const Add = ({ token }) => {
 
             <div>
               <h2 className="font-bold text-slate-800">Category & Pricing</h2>
+
               <p className="text-xs text-slate-500 mt-0.5">
                 Organize your product and set its selling price.
               </p>
@@ -454,6 +536,7 @@ const Add = ({ token }) => {
           <div className="p-5 sm:p-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
               <label className={labelClass}>Category</label>
+
               <select
                 required
                 value={category}
@@ -470,6 +553,7 @@ const Add = ({ token }) => {
 
             <div>
               <label className={labelClass}>Product Type</label>
+
               <select
                 required
                 value={subCategory}
@@ -486,6 +570,7 @@ const Add = ({ token }) => {
 
             <div>
               <label className={labelClass}>Product Price</label>
+
               <div className="relative">
                 <span className="absolute left-4 top-[25px] -translate-y-1/2 text-slate-500 text-sm font-semibold">
                   {currency}
@@ -514,6 +599,7 @@ const Add = ({ token }) => {
 
             <div>
               <h2 className="font-bold text-slate-800">Inventory & Options</h2>
+
               <p className="text-xs text-slate-500 mt-0.5">
                 Manage availability, sizes and product highlights.
               </p>
@@ -527,6 +613,7 @@ const Add = ({ token }) => {
                 <h3 className="text-sm font-semibold text-slate-800">
                   Stock Availability
                 </h3>
+
                 <p className="text-xs text-slate-500 mt-1">
                   Set whether customers can currently purchase this product.
                 </p>
