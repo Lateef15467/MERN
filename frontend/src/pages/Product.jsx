@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { ShopContext } from "../context/ShopContext";
@@ -11,7 +11,6 @@ import {
   FiShield,
   FiRefreshCw,
   FiTruck,
-  FiCheck,
   FiPackage,
 } from "react-icons/fi";
 
@@ -24,16 +23,16 @@ const Product = () => {
   const [producData, setproductData] = useState(false);
   const [image, setimage] = useState("");
   const [size, setsize] = useState("");
+
   const [ratingSummary, setRatingSummary] = useState({
     average: 0,
     count: 0,
   });
-  const [activeTab, setActiveTab] = useState("description");
+
   const [showCartPopup, setShowCartPopup] = useState(false);
   const [addedSize, setAddedSize] = useState("");
 
-  const tabsRef = useRef(null);
-
+  // Load selected product
   useEffect(() => {
     const product = products.find((item) => item._id === productId);
 
@@ -46,7 +45,6 @@ const Product = () => {
     }
 
     setsize("");
-    setActiveTab("description");
     setShowCartPopup(false);
     setRatingSummary({ average: 0, count: 0 });
   }, [productId, products]);
@@ -78,16 +76,12 @@ const Product = () => {
     };
   }, [backendUrl, productId]);
 
-  // Open Reviews tab and scroll to it
+  // Scroll directly to reviews
   const goToReviews = () => {
-    setActiveTab("reviews");
-
-    setTimeout(() => {
-      tabsRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 50);
+    document.getElementById("product-reviews")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   // Add product to cart
@@ -103,13 +97,6 @@ const Product = () => {
     setAddedSize(size);
     setShowCartPopup(true);
   };
-
-  const tabClass = (tab) =>
-    `relative px-5 py-4 text-sm font-semibold transition-all duration-200 ${
-      activeTab === tab
-        ? "text-orange-600"
-        : "text-gray-500 hover:text-gray-900"
-    }`;
 
   return producData ? (
     <main className="w-full bg-white text-gray-800">
@@ -161,7 +148,9 @@ const Product = () => {
               <span className="text-xs font-semibold uppercase tracking-widest text-orange-600">
                 BaltiMart Collection
               </span>
+
               <span className="w-1 h-1 rounded-full bg-gray-300" />
+
               <span className="text-xs text-gray-400">
                 {producData.category}
               </span>
@@ -195,6 +184,7 @@ const Product = () => {
                 {currency}
                 {producData.price}
               </p>
+
               <span className="text-sm text-gray-400 font-medium">PKR</span>
             </div>
 
@@ -213,7 +203,7 @@ const Product = () => {
               )}
             </div>
 
-            {/* Description */}
+            {/* Short description */}
             <p className="mt-5 text-sm sm:text-base leading-7 text-gray-500">
               {producData.description}
             </p>
@@ -222,6 +212,7 @@ const Product = () => {
             <div className="mt-7">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-gray-900">Select Size</h3>
+
                 {size && (
                   <span className="text-xs text-orange-600 font-semibold">
                     Selected: {size}
@@ -271,6 +262,7 @@ const Product = () => {
                 <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0">
                   <FiShield size={19} />
                 </div>
+
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
                     100% Original
@@ -283,6 +275,7 @@ const Product = () => {
                 <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0">
                   <FiTruck size={19} />
                 </div>
+
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
                     Cash on Delivery
@@ -297,6 +290,7 @@ const Product = () => {
                 <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0">
                   <FiRefreshCw size={19} />
                 </div>
+
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
                     Easy Exchange
@@ -309,6 +303,7 @@ const Product = () => {
                 <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0">
                   <FiPackage size={19} />
                 </div>
+
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
                     Secure Shopping
@@ -322,60 +317,39 @@ const Product = () => {
           </div>
         </div>
 
-        {/* Description and reviews */}
-        <section className="mt-16 sm:mt-20 scroll-mt-24" ref={tabsRef}>
-          {/* Tabs */}
-          <div className="flex border-b border-gray-200">
-            <button
-              type="button"
-              onClick={() => setActiveTab("description")}
-              className={tabClass("description")}
-            >
-              Description
-              {activeTab === "description" && (
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-orange-500" />
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("reviews")}
-              className={tabClass("reviews")}
-            >
-              Reviews ({ratingSummary.count})
-              {activeTab === "reviews" && (
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-orange-500" />
-              )}
-            </button>
+        {/* Product Description */}
+        <section className="mt-16 sm:mt-20">
+          <div className="border-b border-gray-200 pb-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              Product Description
+            </h2>
           </div>
 
-          {/* Tab content */}
-          {activeTab === "description" ? (
-            <div className="border border-t-0 border-gray-200 rounded-b-xl p-5 sm:p-8 space-y-4 text-sm leading-7 text-gray-500">
-              {producData.description && <p>{producData.description}</p>}
+          <div className="border border-t-0 border-gray-200 rounded-b-xl p-5 sm:p-8 space-y-4 text-sm leading-7 text-gray-500">
+            {producData.description && <p>{producData.description}</p>}
 
-              <p>
-                Discover the perfect blend of style, comfort, and quality with
-                this product. Designed with premium materials, it offers
-                durability and everyday usability, making it an ideal choice for
-                your wardrobe or lifestyle.
-              </p>
+            <p>
+              Discover the perfect blend of style, comfort, and quality with
+              this product. Designed with premium materials, it offers
+              durability and everyday usability, making it an ideal choice for
+              your wardrobe or lifestyle.
+            </p>
 
-              <p>
-                Whether you’re looking for a modern look or a timeless classic,
-                this piece is crafted to meet your needs. Enjoy reliable
-                quality, affordable pricing, and a product that’s made to fit
-                seamlessly into your daily life.
-              </p>
-            </div>
-          ) : (
-            <div className="border border-t-0 border-gray-200 rounded-b-xl p-4 sm:p-6">
-              <ReviewSection
-                productId={productId}
-                onSummaryChange={setRatingSummary}
-              />
-            </div>
-          )}
+            <p>
+              Whether you're looking for a modern look or a timeless classic,
+              this piece is crafted to meet your needs. Enjoy reliable quality,
+              affordable pricing, and a product that's made to fit seamlessly
+              into your daily life.
+            </p>
+          </div>
+        </section>
+
+        {/* Ratings and Reviews directly below description */}
+        <section id="product-reviews" className="mt-12 sm:mt-16 scroll-mt-24">
+          <ReviewSection
+            productId={productId}
+            onSummaryChange={setRatingSummary}
+          />
         </section>
 
         {/* Related products */}

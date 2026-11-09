@@ -7,11 +7,19 @@ const reviewSchema = new mongoose.Schema(
     userName: { type: String, default: "User" },
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, default: "", maxlength: 1000 },
+
+    // Admin reply
+    adminReply: {
+      message: { type: String, default: "" },
+      adminId: { type: String, default: "" },
+      adminName: { type: String, default: "ShopNow Admin" },
+      repliedAt: { type: Date, default: null },
+    },
   },
   { timestamps: true },
 );
 
-// one review per user per product
+// One review per user per product
 reviewSchema.index({ productId: 1, userId: 1 }, { unique: true });
 
 const reviewModel =
