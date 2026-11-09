@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 // ====== EDIT THIS ======
 const SITE_NAME = "BaltiMart";
 const SITE_URL = "https://baltimart.vercel.app";
-const EMAIL = "YOUR_EMAIL@gmail.com";
+const EMAIL = "lateef4262@gmail.com";
 const LAST_UPDATED = "7 November 2026";
 // =======================
 
