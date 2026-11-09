@@ -79,6 +79,7 @@ const Add = ({ token }) => {
 
   const setImages = [setImage1, setImage2, setImage3, setImage4];
 
+  // Handle category change
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
 
@@ -90,6 +91,7 @@ const Add = ({ token }) => {
     setSizes([]);
   };
 
+  // Handle size selection
   const toggleSize = (size) => {
     setSizes((prev) =>
       prev.includes(size)
@@ -103,6 +105,12 @@ const Add = ({ token }) => {
     const file = e.target.files[0];
 
     if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image");
+      e.target.value = "";
+      return;
+    }
 
     const index = imageNumber - 1;
 
@@ -153,13 +161,22 @@ const Add = ({ token }) => {
     setSizes([]);
 
     setImageProgress([0, 0, 0, 0]);
-
     setImageStatus(["idle", "idle", "idle", "idle"]);
   };
 
   // Submit product and upload images individually
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error("Please enter product name");
+      return;
+    }
+
+    if (!description.trim()) {
+      toast.error("Please enter product description");
+      return;
+    }
 
     if (!images.some(Boolean)) {
       toast.error("Please upload at least one product image");
@@ -176,10 +193,13 @@ const Add = ({ token }) => {
       return;
     }
 
+    if (!token) {
+      toast.error("Admin authentication token is missing");
+      return;
+    }
+
     setLoading(true);
-
     setImageProgress([0, 0, 0, 0]);
-
     setImageStatus(["idle", "idle", "idle", "idle"]);
 
     let currentImageIndex = -1;
@@ -187,7 +207,7 @@ const Add = ({ token }) => {
     try {
       const uploadedImageUrls = [];
 
-      // Upload images one by one
+      // Upload selected images one by one
       for (let index = 0; index < images.length; index++) {
         const file = images[index];
 
@@ -233,7 +253,7 @@ const Add = ({ token }) => {
 
         uploadedImageUrls.push(response.data.imageUrl);
 
-        // Mark current image as uploaded
+        // Mark image as uploaded
         setImageProgress((prev) =>
           prev.map((value, i) => (i === index ? 100 : value)),
         );
@@ -245,11 +265,11 @@ const Add = ({ token }) => {
         currentImageIndex = -1;
       }
 
-      // Save product after all images are uploaded
+      // Product data
       const productData = {
-        name,
-        description,
-        price,
+        name: name.trim(),
+        description: description.trim(),
+        price: Number(price),
         inStock,
         category,
         subCategory,
@@ -258,24 +278,29 @@ const Add = ({ token }) => {
         imageUrls: uploadedImageUrls,
       };
 
+      // Save product after successful image uploads
       const response = await axios.post(
         backendUrl + "/api/product/add",
         productData,
         {
           headers: {
             token,
+            "Content-Type": "application/json",
           },
         },
       );
 
-      if (response.data.success) {
-        toast.success(response.data.message);
-      } else {
-        toast.error(response.data.message);
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to add product");
       }
+
+      toast.success(response.data.message || "Product added successfully");
+
+      resetForm();
     } catch (error) {
       console.log("Product upload error:", error);
 
+      // Mark the failed image
       if (currentImageIndex !== -1) {
         setImageStatus((prev) =>
           prev.map((status, i) => (i === currentImageIndex ? "error" : status)),
