@@ -215,7 +215,7 @@ const Contact = () => {
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-sm">
           <iframe
             title="BaltiMart Location in Skardu"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3354.981496259256!2d75.63135797458883!3d35.30237425218427!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38f54a23a1f6b04b%3A0x4b56dfb5931b7c74!2sGovt.%20Boys%20Degree%20College%20Skardu!5e0!3m2!1sen!2s!4v1731425000000!5m2!1sen!2s"
+            src="https://maps.google.com/maps?q=35.2806025,75.6528116&z=16&output=embed"
             width="100%"
             height="400"
             style={{ border: 0 }}
