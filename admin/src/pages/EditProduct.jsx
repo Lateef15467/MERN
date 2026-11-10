@@ -6,80 +6,143 @@ import {
   FiUploadCloud,
   FiPackage,
   FiTag,
-  FiDollarSign,
+  FiCheckCircle,
+  FiStar,
+  FiImage,
+  FiPlus,
+  FiX,
   FiCheck,
   FiArrowLeft,
-  FiStar,
-  FiLayers,
   FiLoader,
 } from "react-icons/fi";
-import { backendUrl } from "../App";
-import { assets } from "../assets/assets";
+import { backendUrl, currency } from "../App";
+
+// Same categories and subcategories as Add.jsx
+const CATEGORY_SUBCATEGORIES = {
+  Men: ["Topwear", "Bottomwear", "Winterwear"],
+  Women: ["Topwear", "Bottomwear", "Winterwear"],
+  Kids: ["Topwear", "Bottomwear", "Winterwear"],
+  Electronics: ["Laptops", "Headphones", "Accessories"],
+  "Mobile & Accessories": ["Smartphones", "Accessories"],
+  "Home & Living": ["Home Decor"],
+  Furniture: ["Furniture"],
+  "Beauty & Personal Care": ["Skincare", "Makeup"],
+  Footwear: ["Shoes"],
+  "Bags & Accessories": ["Bags", "Accessories"],
+  "Sports & Outdoors": ["Sports Equipment"],
+  "Kitchen & Dining": ["Kitchen Appliances"],
+  Grocery: ["Food & Beverages"],
+  Watches: ["Watches"],
+  "Toys & Games": ["Toys"],
+  "Books & Stationery": ["Books & Stationery", "Stationery"],
+  Automotive: ["Automotive Accessories"],
+};
 
 const EditProduct = ({ token }) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Images: existing URLs or newly selected files
   const [images, setImages] = useState([null, null, null, null]);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+
   const [category, setCategory] = useState("Men");
-  const [subCategory, setsubCategory] = useState("Topwear");
+  const [subCategory, setSubCategory] = useState("Topwear");
+
+  const [inStock, setInStock] = useState(false);
   const [bestseller, setBestseller] = useState(false);
   const [Sizes, setSizes] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [inStock, setInStock] = useState(false);
 
+  // Individual image upload status
+  const [imageProgress, setImageProgress] = useState([0, 0, 0, 0]);
+
+  const [imageStatus, setImageStatus] = useState([
+    "idle",
+    "idle",
+    "idle",
+    "idle",
+  ]);
+
+  const availableSubCategories = CATEGORY_SUBCATEGORIES[category] || [];
+
+  const showSizes = ["Men", "Women", "Kids", "Footwear"].includes(category);
+
+  const sizeOptions =
+    category === "Footwear"
+      ? ["6", "7", "8", "9", "10", "11", "12"]
+      : ["S", "M", "L", "XL", "XXL"];
+
+  // Image preview
   const preview = (item) => {
-    if (!item) return assets.upload_area;
+    if (!item) return null;
+
     if (typeof item === "string") return item;
+
     return URL.createObjectURL(item);
   };
 
+  // Fetch product details
   useEffect(() => {
-    const applyProductToState = (p) => {
-      setName(p.name || "");
-      setDescription(p.description || "");
-      setPrice(p.price ?? "");
-      setInStock(Boolean(p.inStock));
-      setCategory(p.category || "Men");
-      setsubCategory(p.subCategory || "Topwear");
-      setBestseller(Boolean(p.bestseller));
-      setSizes(Array.isArray(p.Sizes) ? p.Sizes : []);
+    const applyProductToState = (product) => {
+      setName(product.name || "");
+      setDescription(product.description || "");
+      setPrice(product.price ?? "");
 
-      const fetchedImages = Array.isArray(p.image) ? p.image : [];
-      const temp = [null, null, null, null];
+      setInStock(Boolean(product.inStock));
+      setCategory(product.category || "Men");
+      setBestseller(Boolean(product.bestseller));
+
+      const selectedCategory = product.category || "Men";
+
+      const subcategories = CATEGORY_SUBCATEGORIES[selectedCategory] || [];
+
+      setSubCategory(
+        subcategories.includes(product.subCategory)
+          ? product.subCategory
+          : subcategories[0] || "",
+      );
+
+      setSizes(Array.isArray(product.Sizes) ? product.Sizes : []);
+
+      const fetchedImages = Array.isArray(product.image) ? product.image : [];
+
+      const imageArray = [null, null, null, null];
 
       for (let i = 0; i < Math.min(fetchedImages.length, 4); i++) {
-        temp[i] = fetchedImages[i];
+        imageArray[i] = fetchedImages[i];
       }
 
-      setImages(temp);
+      setImages(imageArray);
     };
 
     const fetchProduct = async () => {
       setFetching(true);
 
       try {
-        const res = await axios.get(`${backendUrl}/api/product/${id}`);
+        const response = await axios.get(`${backendUrl}/api/product/${id}`);
 
-        if (res.data?.success) {
-          applyProductToState(res.data.product);
+        if (response.data?.success) {
+          applyProductToState(response.data.product);
           return;
         }
 
         toast.error("Product not found");
-      } catch (err) {
-        if (err.response?.status === 404) {
+      } catch (error) {
+        if (error.response?.status === 404) {
           try {
-            const res2 = await axios.post(`${backendUrl}/api/product/single`, {
-              productId: id,
-            });
+            const response = await axios.post(
+              `${backendUrl}/api/product/single`,
+              { productId: id },
+            );
 
-            if (res2.data?.success) {
-              applyProductToState(res2.data.product);
+            if (response.data?.success) {
+              applyProductToState(response.data.product);
             } else {
               toast.error("Product not found");
             }
@@ -97,75 +160,228 @@ const EditProduct = ({ token }) => {
     fetchProduct();
   }, [id]);
 
+  // Category change
+  const handleCategoryChange = (e) => {
+    const selectedCategory = e.target.value;
+
+    setCategory(selectedCategory);
+
+    const types = CATEGORY_SUBCATEGORIES[selectedCategory] || [];
+
+    setSubCategory(types[0] || "");
+    setSizes([]);
+  };
+
+  // Size selection
+  const toggleSize = (size) => {
+    setSizes((previous) =>
+      previous.includes(size)
+        ? previous.filter((item) => item !== size)
+        : [...previous, size],
+    );
+  };
+
+  // Select image
   const handleImageChange = (e, index) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
-    const copy = [...images];
-    copy[index] = file;
-    setImages(copy);
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image");
+      e.target.value = "";
+      return;
+    }
+
+    setImages((previous) => {
+      const updated = [...previous];
+      updated[index] = file;
+      return updated;
+    });
+
+    setImageProgress((previous) =>
+      previous.map((value, i) => (i === index ? 0 : value)),
+    );
+
+    setImageStatus((previous) =>
+      previous.map((status, i) => (i === index ? "idle" : status)),
+    );
 
     e.target.value = "";
   };
 
+  // Remove image
+  const removeImage = (index) => {
+    setImages((previous) => {
+      const updated = [...previous];
+      updated[index] = null;
+      return updated;
+    });
+
+    setImageProgress((previous) =>
+      previous.map((value, i) => (i === index ? 0 : value)),
+    );
+
+    setImageStatus((previous) =>
+      previous.map((status, i) => (i === index ? "idle" : status)),
+    );
+  };
+
+  // Update product
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (!name.trim() || !description.trim() || !price) {
-      toast.error("Please fill all required fields");
+    if (!name.trim()) {
+      toast.error("Please enter product name");
+      return;
+    }
+
+    if (!description.trim()) {
+      toast.error("Please enter product description");
+      return;
+    }
+
+    if (!price || Number(price) <= 0) {
+      toast.error("Please enter a valid product price");
+      return;
+    }
+
+    if (!subCategory) {
+      toast.error("Please select a product type");
+      return;
+    }
+
+    if (!images.some(Boolean)) {
+      toast.error("Please keep at least one product image");
+      return;
+    }
+
+    if (!token) {
+      toast.error("Admin authentication token is missing");
       return;
     }
 
     setLoading(true);
+    setImageProgress([0, 0, 0, 0]);
+    setImageStatus(["idle", "idle", "idle", "idle"]);
+
+    const uploadedImageUrls = [...images];
 
     try {
-      const form = new FormData();
+      // Upload newly selected images individually
+      for (let index = 0; index < images.length; index++) {
+        const file = images[index];
 
-      form.append("name", name);
-      form.append("description", description);
-      form.append("price", price);
-      form.append("inStock", String(inStock));
-      form.append("category", category);
-      form.append("subCategory", subCategory);
-      form.append("bestseller", String(bestseller));
-      form.append("Sizes", JSON.stringify(Sizes));
-
-      images.forEach((img, idx) => {
-        if (img instanceof File) {
-          form.append(`image${idx + 1}`, img);
+        // Existing image URL: keep it
+        if (!file || typeof file === "string") {
+          continue;
         }
-      });
 
-      const res = await axios.put(
+        setImageStatus((previous) =>
+          previous.map((status, i) => (i === index ? "uploading" : status)),
+        );
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const response = await axios.post(
+          `${backendUrl}/api/product/upload-image`,
+          formData,
+          {
+            headers: { token },
+            onUploadProgress: (event) => {
+              if (event.total) {
+                const percentage = Math.round(
+                  (event.loaded * 100) / event.total,
+                );
+
+                setImageProgress((previous) =>
+                  previous.map((value, i) =>
+                    i === index ? percentage : value,
+                  ),
+                );
+              }
+            },
+          },
+        );
+
+        if (!response.data?.success || !response.data?.imageUrl) {
+          throw new Error(
+            response.data?.message || `Image ${index + 1} upload failed`,
+          );
+        }
+
+        uploadedImageUrls[index] = response.data.imageUrl;
+
+        setImageProgress((previous) =>
+          previous.map((value, i) => (i === index ? 100 : value)),
+        );
+
+        setImageStatus((previous) =>
+          previous.map((status, i) => (i === index ? "uploaded" : status)),
+        );
+      }
+
+      // Remove empty image slots
+      const finalImages = uploadedImageUrls.filter(Boolean);
+
+      // Product data
+      const productData = {
+        name: name.trim(),
+        description: description.trim(),
+        price: Number(price),
+        inStock,
+        category,
+        subCategory,
+        bestseller,
+        Sizes,
+        imageUrls: finalImages,
+      };
+
+      // Update product
+      const response = await axios.put(
         `${backendUrl}/api/product/update/${id}`,
-        form,
+        productData,
         {
           headers: {
             token,
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
         },
       );
 
-      if (res.data?.success) {
-        toast.success("Product updated successfully");
-        navigate("/list");
-      } else {
-        toast.error(res.data?.message || "Update failed");
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Product update failed");
       }
+
+      toast.success(response.data.message || "Product updated successfully");
+
+      navigate("/list");
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Error updating product");
+      console.error("Product update error:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Error updating product",
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const inputClass =
+    "w-full mt-2 px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10";
+
+  const labelClass = "block text-sm font-semibold text-slate-700";
+
+  const selectedCount = images.filter(Boolean).length;
+
+  // Loading page
   if (fetching) {
     return (
       <div className="w-full min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <FiLoader className="animate-spin text-3xl text-gray-700" />
+        <FiLoader className="animate-spin text-3xl text-indigo-600" />
         <p className="text-sm text-gray-500">Loading product details...</p>
       </div>
     );
@@ -174,306 +390,422 @@ const EditProduct = ({ token }) => {
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7">
         <div>
           <button
             type="button"
             onClick={() => navigate("/list")}
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-black mb-3 transition"
+            className="flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 mb-3"
           >
             <FiArrowLeft />
             Back to Products
           </button>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <div className="flex items-center gap-2 text-sm text-slate-400 mb-2">
+            <span>Products</span>
+            <span>/</span>
+            <span className="text-indigo-600 font-medium">Edit Product</span>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
             Edit Product
           </h1>
 
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Update product details, images, pricing and inventory.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl w-fit">
-          <FiPackage />
-          <span className="text-sm font-medium">Product Management</span>
+        <div className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-3 rounded-xl text-sm font-medium w-fit">
+          <FiPackage size={18} />
+          Product Management
         </div>
       </div>
 
       <form onSubmit={submitHandler} className="space-y-6">
-        {/* Images Section */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="bg-blue-50 text-blue-600 p-2.5 rounded-xl">
-              <FiUploadCloud size={20} />
+        {/* Product Images */}
+        <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 sm:px-7 py-5 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <FiImage size={20} />
             </div>
 
             <div>
-              <h2 className="font-semibold text-gray-900">Product Images</h2>
-              <p className="text-xs text-gray-500">
-                Upload up to 4 product images
+              <h2 className="font-bold text-slate-800">Product Images</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Keep, replace or remove images. Upload up to four images.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {images.map((img, i) => (
-              <label key={i} className="relative group cursor-pointer">
-                <div className="aspect-square rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 overflow-hidden group-hover:border-gray-500 transition">
-                  <img
-                    src={preview(img)}
-                    alt={`Product ${i + 1}`}
-                    className="w-full h-full object-contain p-2"
-                  />
-
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white">
-                    <FiUploadCloud size={24} />
-                    <span className="text-xs mt-2 font-medium">
-                      Change Image
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-center text-xs text-gray-500 mt-2">
-                  Image {i + 1}
+          <div className="p-5 sm:p-7">
+            {/* Image summary */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <div>
+                <p className="text-sm font-semibold text-slate-700">
+                  Images Selected
                 </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {selectedCount} of 4 images selected
+                </p>
+              </div>
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={(e) => handleImageChange(e, i)}
-                />
-              </label>
-            ))}
+              <div className="flex items-center gap-2">
+                <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all"
+                    style={{
+                      width: `${(selectedCount / 4) * 100}%`,
+                    }}
+                  />
+                </div>
+                <span className="text-xs font-bold text-emerald-600">
+                  {selectedCount}/4
+                </span>
+              </div>
+            </div>
+
+            {/* Image cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {images.map((img, index) => (
+                <div key={index} className="relative group">
+                  <label
+                    htmlFor={`edit-image-${index}`}
+                    className={`relative flex flex-col items-center justify-center w-full aspect-square rounded-2xl border-2 border-dashed cursor-pointer overflow-hidden transition-all ${
+                      img
+                        ? "border-emerald-400 bg-emerald-50"
+                        : "border-slate-200 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50/50"
+                    }`}
+                  >
+                    {img ? (
+                      <>
+                        <img
+                          src={preview(img)}
+                          alt={`Product ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Upload status */}
+                        {imageStatus[index] !== "idle" && (
+                          <div
+                            className={`absolute bottom-0 left-0 right-0 text-white py-2 px-2 flex flex-col items-center justify-center gap-1 text-xs font-semibold ${
+                              imageStatus[index] === "uploaded"
+                                ? "bg-emerald-600"
+                                : imageStatus[index] === "error"
+                                  ? "bg-red-600"
+                                  : "bg-indigo-600"
+                            }`}
+                          >
+                            {imageStatus[index] === "uploaded" ? (
+                              <span className="flex items-center gap-1">
+                                <FiCheck size={14} />
+                                Uploaded
+                              </span>
+                            ) : imageStatus[index] === "error" ? (
+                              "Upload Failed"
+                            ) : (
+                              <>
+                                <span>Uploading {imageProgress[index]}%</span>
+                                <div className="w-full h-1.5 bg-white/30 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-white rounded-full transition-all"
+                                    style={{
+                                      width: `${imageProgress[index]}%`,
+                                    }}
+                                  />
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center text-center p-3">
+                        <div className="w-12 h-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-indigo-500 mb-3">
+                          <FiUploadCloud size={23} />
+                        </div>
+
+                        <span className="text-sm font-semibold text-slate-600">
+                          Upload Image
+                        </span>
+                        <span className="text-xs text-slate-400 mt-1">
+                          Image {index + 1}
+                        </span>
+                      </div>
+                    )}
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      id={`edit-image-${index}`}
+                      disabled={loading}
+                      onChange={(e) => handleImageChange(e, index)}
+                    />
+                  </label>
+
+                  {/* Remove image */}
+                  {img && (
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      disabled={loading}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-red-500 shadow-md flex items-center justify-center hover:bg-red-50 transition disabled:opacity-50"
+                      title="Remove image"
+                    >
+                      <FiX size={17} />
+                    </button>
+                  )}
+
+                  <p className="text-center text-xs text-slate-400 mt-2">
+                    Image {index + 1}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Basic Information */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="bg-purple-50 text-purple-600 p-2.5 rounded-xl">
+        <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 sm:px-7 py-5 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
               <FiPackage size={20} />
             </div>
 
             <div>
-              <h2 className="font-semibold text-gray-900">Basic Information</h2>
-              <p className="text-xs text-gray-500">
-                Product name and description
+              <h2 className="font-bold text-slate-800">Basic Information</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Update product name and description.
               </p>
             </div>
           </div>
 
-          <div className="space-y-5">
+          <div className="p-5 sm:p-7 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Name *
-              </label>
-
+              <label className={labelClass}>Product Name</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter product name"
-                className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-black focus:ring-1 focus:ring-black transition"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Description *
-              </label>
-
+              <label className={labelClass}>Product Description</label>
               <textarea
                 required
                 rows={5}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Write product description..."
-                className="w-full p-3 border border-gray-200 rounded-xl outline-none resize-y focus:border-black focus:ring-1 focus:ring-black transition"
+                placeholder="Describe your product, its features and details..."
+                className={`${inputClass} resize-y min-h-32`}
               />
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Pricing and Categories */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="bg-green-50 text-green-600 p-2.5 rounded-xl">
+        {/* Category and Pricing */}
+        <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 sm:px-7 py-5 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
               <FiTag size={20} />
             </div>
 
             <div>
-              <h2 className="font-semibold text-gray-900">
-                Pricing & Categories
-              </h2>
-              <p className="text-xs text-gray-500">
-                Set product price and classification
+              <h2 className="font-bold text-slate-800">Category & Pricing</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Organize your product and update its selling price.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="p-5 sm:p-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Price *
-              </label>
+              <label className={labelClass}>Category</label>
+              <select
+                required
+                value={category}
+                onChange={handleCategoryChange}
+                className={inputClass}
+              >
+                {Object.keys(CATEGORY_SUBCATEGORIES).map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className={labelClass}>Product Type</label>
+              <select
+                required
+                value={subCategory}
+                onChange={(e) => setSubCategory(e.target.value)}
+                className={inputClass}
+              >
+                {availableSubCategories.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className={labelClass}>Product Price</label>
 
               <div className="relative">
-                <FiDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <span className="absolute left-4 top-[25px] -translate-y-1/2 text-slate-500 text-sm font-semibold">
+                  {currency}
+                </span>
 
                 <input
                   type="number"
-                  min="0"
+                  min="1"
                   step="0.01"
                   required
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl outline-none focus:border-black transition"
+                  placeholder="0"
+                  className={`${inputClass} pl-14`}
                 />
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category
-              </label>
-
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-black bg-white"
-              >
-                <option>Men</option>
-                <option>Women</option>
-                <option>Kids</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sub Category
-              </label>
-
-              <select
-                value={subCategory}
-                onChange={(e) => setsubCategory(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-black bg-white"
-              >
-                <option>Topwear</option>
-                <option>Bottomwear</option>
-                <option>Winterwear</option>
-              </select>
-            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Inventory */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="bg-orange-50 text-orange-600 p-2.5 rounded-xl">
-              <FiLayers size={20} />
+        {/* Inventory and Options */}
+        <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 sm:px-7 py-5 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <FiCheckCircle size={20} />
             </div>
 
             <div>
-              <h2 className="font-semibold text-gray-900">
-                Inventory & Options
-              </h2>
-              <p className="text-xs text-gray-500">
-                Manage availability and product sizes
+              <h2 className="font-bold text-slate-800">Inventory & Options</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Manage availability, sizes and product highlights.
               </p>
             </div>
           </div>
 
-          {/* Stock */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100 mb-5">
-            <div>
-              <p className="font-medium text-sm text-gray-800">
-                Stock Availability
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Control whether customers can purchase this product.
-              </p>
+          <div className="p-5 sm:p-7 space-y-7">
+            {/* Stock */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800">
+                  Stock Availability
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Set whether customers can currently purchase this product.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setInStock(!inStock)}
+                className={`relative w-14 h-7 rounded-full transition-colors ${
+                  inStock ? "bg-emerald-500" : "bg-slate-300"
+                }`}
+                aria-label="Toggle stock availability"
+              >
+                <span
+                  className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all ${
+                    inStock ? "left-8" : "left-1"
+                  }`}
+                />
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setInStock(!inStock)}
-              className={`relative w-14 h-7 rounded-full transition-colors ${
-                inStock ? "bg-green-500" : "bg-gray-300"
-              }`}
-            >
+            <div className="flex items-center gap-2">
               <span
-                className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all ${
-                  inStock ? "left-8" : "left-1"
+                className={`w-2 h-2 rounded-full ${
+                  inStock ? "bg-emerald-500" : "bg-red-400"
                 }`}
               />
-            </button>
-          </div>
-
-          <div className="mb-5">
-            <p className="text-sm font-medium text-gray-700 mb-3">
-              Available Sizes
-            </p>
-
-            <div className="flex flex-wrap gap-3">
-              {["S", "M", "L", "XL", "XXL"].map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() =>
-                    setSizes((prev) =>
-                      prev.includes(s)
-                        ? prev.filter((x) => x !== s)
-                        : [...prev, s],
-                    )
-                  }
-                  className={`min-w-12 px-4 py-2.5 rounded-xl border text-sm font-medium transition ${
-                    Sizes.includes(s)
-                      ? "bg-black text-white border-black"
-                      : "bg-gray-50 text-gray-700 border-gray-200 hover:border-black"
-                  }`}
+              <span className="text-sm text-slate-600">
+                Current status:{" "}
+                <strong
+                  className={inStock ? "text-emerald-600" : "text-red-500"}
                 >
-                  {s}
-                </button>
-              ))}
+                  {inStock ? "In Stock" : "Out of Stock"}
+                </strong>
+              </span>
             </div>
-          </div>
 
-          {/* Bestseller */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="bg-yellow-100 text-yellow-600 p-2 rounded-lg">
-                <FiStar size={18} />
-              </div>
-
+            {/* Dynamic sizes */}
+            {showSizes && (
               <div>
-                <p className="font-medium text-sm text-gray-800">
-                  Bestseller Product
+                <h3 className="text-sm font-semibold text-slate-800 mb-1">
+                  Available Sizes
+                </h3>
+
+                <p className="text-xs text-slate-500 mb-4">
+                  Select all sizes available for this product.
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Highlight this product as a bestseller.
-                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  {sizeOptions.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => toggleSize(size)}
+                      className={`min-w-12 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+                        Sizes.includes(size)
+                          ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
+
+            {/* Bestseller */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-amber-50/60 border border-amber-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <FiStar size={20} />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-800">
+                    Mark as Bestseller
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Highlight this product as a popular item.
+                  </p>
+                </div>
+              </div>
+
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={bestseller}
+                  onChange={() => setBestseller(!bestseller)}
+                  className="sr-only peer"
+                />
+
+                <div className="w-12 h-6 bg-slate-300 rounded-full peer peer-checked:bg-amber-500 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:shadow after:transition-all peer-checked:after:translate-x-6" />
+              </label>
             </div>
-
-            <input
-              type="checkbox"
-              checked={bestseller}
-              onChange={() => setBestseller(!bestseller)}
-              className="w-5 h-5 accent-black cursor-pointer"
-            />
           </div>
-        </div>
+        </section>
 
-        {/* Submit */}
-        <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+        {/* Submit actions */}
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-2">
           <button
             type="button"
             onClick={() => navigate("/list")}
-            className="px-6 py-3 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            disabled={loading}
+            className="px-6 py-3.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition disabled:opacity-50"
           >
             Cancel
           </button>
@@ -481,20 +813,16 @@ const EditProduct = ({ token }) => {
           <button
             type="submit"
             disabled={loading}
-            className={`flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold transition ${
-              loading
-                ? "bg-gray-400 text-white cursor-not-allowed"
-                : "bg-black text-white hover:bg-gray-800 active:scale-[0.98]"
-            }`}
+            className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
-                <FiLoader className="animate-spin" />
+                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Updating Product...
               </>
             ) : (
               <>
-                <FiCheck />
+                <FiCheck size={19} />
                 Update Product
               </>
             )}
