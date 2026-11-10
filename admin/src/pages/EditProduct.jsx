@@ -9,7 +9,6 @@ import {
   FiCheckCircle,
   FiStar,
   FiImage,
-  FiPlus,
   FiX,
   FiCheck,
   FiArrowLeft,
@@ -17,7 +16,7 @@ import {
 } from "react-icons/fi";
 import { backendUrl, currency } from "../App";
 
-// Same categories and subcategories as Add.jsx
+// Categories and subcategories
 const CATEGORY_SUBCATEGORIES = {
   Men: ["Topwear", "Bottomwear", "Winterwear"],
   Women: ["Topwear", "Bottomwear", "Winterwear"],
@@ -45,21 +44,28 @@ const EditProduct = ({ token }) => {
   // Images: existing URLs or newly selected files
   const [images, setImages] = useState([null, null, null, null]);
 
+  // Image previews
+  const [imagePreviews, setImagePreviews] = useState([null, null, null, null]);
+
+  // Product details
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
 
+  // Category and product type
   const [category, setCategory] = useState("Men");
   const [subCategory, setSubCategory] = useState("Topwear");
 
+  // Product options
   const [inStock, setInStock] = useState(false);
   const [bestseller, setBestseller] = useState(false);
   const [Sizes, setSizes] = useState([]);
 
+  // Loading states
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
-  // Individual image upload status
+  // Individual image upload progress and status
   const [imageProgress, setImageProgress] = useState([0, 0, 0, 0]);
 
   const [imageStatus, setImageStatus] = useState([
@@ -78,86 +84,113 @@ const EditProduct = ({ token }) => {
       ? ["6", "7", "8", "9", "10", "11", "12"]
       : ["S", "M", "L", "XL", "XXL"];
 
-  // Image preview
-  const preview = (item) => {
-    if (!item) return null;
+  const selectedCount = images.filter(Boolean).length;
 
-    if (typeof item === "string") return item;
+  const isUploading = imageStatus.some((status) => status === "uploading");
 
-    return URL.createObjectURL(item);
+  // Create previews without repeatedly generating object URLs
+  useEffect(() => {
+    const previews = images.map((item) => {
+      if (!item) return null;
+
+      if (typeof item === "string") {
+        return item;
+      }
+
+      return URL.createObjectURL(item);
+    });
+
+    setImagePreviews(previews);
+
+    return () => {
+      previews.forEach((url, index) => {
+        if (url && images[index] && typeof images[index] !== "string") {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [images]);
+
+  // Apply fetched product details
+  const applyProductToState = (product) => {
+    setName(product.name || "");
+    setDescription(product.description || "");
+    setPrice(product.price ?? "");
+
+    setInStock(Boolean(product.inStock));
+    setCategory(product.category || "Men");
+    setBestseller(Boolean(product.bestseller));
+
+    const selectedCategory = product.category || "Men";
+
+    const subcategories = CATEGORY_SUBCATEGORIES[selectedCategory] || [];
+
+    setSubCategory(
+      subcategories.includes(product.subCategory)
+        ? product.subCategory
+        : subcategories[0] || "",
+    );
+
+    setSizes(Array.isArray(product.Sizes) ? product.Sizes : []);
+
+    const fetchedImages = Array.isArray(product.image) ? product.image : [];
+
+    const imageArray = [null, null, null, null];
+
+    for (let i = 0; i < Math.min(fetchedImages.length, 4); i++) {
+      imageArray[i] = fetchedImages[i];
+    }
+
+    setImages(imageArray);
   };
 
   // Fetch product details
   useEffect(() => {
-    const applyProductToState = (product) => {
-      setName(product.name || "");
-      setDescription(product.description || "");
-      setPrice(product.price ?? "");
-
-      setInStock(Boolean(product.inStock));
-      setCategory(product.category || "Men");
-      setBestseller(Boolean(product.bestseller));
-
-      const selectedCategory = product.category || "Men";
-
-      const subcategories = CATEGORY_SUBCATEGORIES[selectedCategory] || [];
-
-      setSubCategory(
-        subcategories.includes(product.subCategory)
-          ? product.subCategory
-          : subcategories[0] || "",
-      );
-
-      setSizes(Array.isArray(product.Sizes) ? product.Sizes : []);
-
-      const fetchedImages = Array.isArray(product.image) ? product.image : [];
-
-      const imageArray = [null, null, null, null];
-
-      for (let i = 0; i < Math.min(fetchedImages.length, 4); i++) {
-        imageArray[i] = fetchedImages[i];
-      }
-
-      setImages(imageArray);
-    };
+    let isMounted = true;
 
     const fetchProduct = async () => {
       setFetching(true);
 
       try {
-        const response = await axios.get(`${backendUrl}/api/product/${id}`);
+        let response;
 
-        if (response.data?.success) {
-          applyProductToState(response.data.product);
-          return;
+        try {
+          response = await axios.get(`${backendUrl}/api/product/${id}`);
+        } catch (error) {
+          if (error.response?.status !== 404) {
+            throw error;
+          }
+
+          response = await axios.post(`${backendUrl}/api/product/single`, {
+            productId: id,
+          });
         }
 
-        toast.error("Product not found");
-      } catch (error) {
-        if (error.response?.status === 404) {
-          try {
-            const response = await axios.post(
-              `${backendUrl}/api/product/single`,
-              { productId: id },
-            );
+        if (!isMounted) return;
 
-            if (response.data?.success) {
-              applyProductToState(response.data.product);
-            } else {
-              toast.error("Product not found");
-            }
-          } catch {
-            toast.error("Failed to load product");
-          }
+        if (response.data?.success && response.data?.product) {
+          applyProductToState(response.data.product);
         } else {
-          toast.error("Error loading product");
+          toast.error("Product not found");
+        }
+      } catch (error) {
+        console.error("Fetch product error:", error);
+
+        if (isMounted) {
+          toast.error(error.response?.data?.message || "Error loading product");
         }
       } finally {
-        setFetching(false);
+        if (isMounted) {
+          setFetching(false);
+        }
       }
     };
 
     fetchProduct();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   // Category change
@@ -181,8 +214,8 @@ const EditProduct = ({ token }) => {
     );
   };
 
-  // Select image
-  const handleImageChange = (e, index) => {
+  // Immediately upload selected image
+  const handleImageChange = async (e, index) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
@@ -193,25 +226,98 @@ const EditProduct = ({ token }) => {
       return;
     }
 
+    if (!token) {
+      toast.error("Admin authentication token is missing");
+      e.target.value = "";
+      return;
+    }
+
+    // Show selected image immediately
     setImages((previous) => {
       const updated = [...previous];
       updated[index] = file;
       return updated;
     });
 
+    // Start upload status
     setImageProgress((previous) =>
       previous.map((value, i) => (i === index ? 0 : value)),
     );
 
     setImageStatus((previous) =>
-      previous.map((status, i) => (i === index ? "idle" : status)),
+      previous.map((status, i) => (i === index ? "uploading" : status)),
     );
 
+    // Reset input to allow selecting the same file again
     e.target.value = "";
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const response = await axios.post(
+        `${backendUrl}/api/product/upload-image`,
+        formData,
+        {
+          headers: {
+            token,
+          },
+
+          onUploadProgress: (event) => {
+            if (event.total) {
+              const percentage = Math.round((event.loaded * 100) / event.total);
+
+              setImageProgress((previous) =>
+                previous.map((value, i) => (i === index ? percentage : value)),
+              );
+            }
+          },
+        },
+      );
+
+      if (!response.data?.success || !response.data?.imageUrl) {
+        throw new Error(
+          response.data?.message || `Image ${index + 1} upload failed`,
+        );
+      }
+
+      // Replace File with uploaded Cloudinary URL
+      setImages((previous) => {
+        const updated = [...previous];
+        updated[index] = response.data.imageUrl;
+        return updated;
+      });
+
+      setImageProgress((previous) =>
+        previous.map((value, i) => (i === index ? 100 : value)),
+      );
+
+      setImageStatus((previous) =>
+        previous.map((status, i) => (i === index ? "uploaded" : status)),
+      );
+
+      // No success toast for image upload
+    } catch (error) {
+      console.error("Image upload error:", error);
+
+      setImageStatus((previous) =>
+        previous.map((status, i) => (i === index ? "error" : status)),
+      );
+
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          `Image ${index + 1} upload failed`,
+      );
+    }
   };
 
   // Remove image
   const removeImage = (index) => {
+    if (imageStatus[index] === "uploading") {
+      return;
+    }
+
     setImages((previous) => {
       const updated = [...previous];
       updated[index] = null;
@@ -256,76 +362,35 @@ const EditProduct = ({ token }) => {
       return;
     }
 
+    // Prevent update while image uploads are running
+    if (isUploading) {
+      toast.warning("Please wait for image uploads to finish");
+      return;
+    }
+
+    // Every selected file must have uploaded successfully
+    const failedUpload = images.some(
+      (item) => item && typeof item !== "string",
+    );
+
+    if (failedUpload) {
+      toast.error("Some images are not uploaded. Please select them again.");
+      return;
+    }
+
     if (!token) {
       toast.error("Admin authentication token is missing");
       return;
     }
 
     setLoading(true);
-    setImageProgress([0, 0, 0, 0]);
-    setImageStatus(["idle", "idle", "idle", "idle"]);
-
-    const uploadedImageUrls = [...images];
 
     try {
-      // Upload newly selected images individually
-      for (let index = 0; index < images.length; index++) {
-        const file = images[index];
+      // Keep existing and newly uploaded Cloudinary URLs
+      const finalImages = images.filter(
+        (image) => typeof image === "string" && image.length > 0,
+      );
 
-        // Existing image URL: keep it
-        if (!file || typeof file === "string") {
-          continue;
-        }
-
-        setImageStatus((previous) =>
-          previous.map((status, i) => (i === index ? "uploading" : status)),
-        );
-
-        const formData = new FormData();
-        formData.append("image", file);
-
-        const response = await axios.post(
-          `${backendUrl}/api/product/upload-image`,
-          formData,
-          {
-            headers: { token },
-            onUploadProgress: (event) => {
-              if (event.total) {
-                const percentage = Math.round(
-                  (event.loaded * 100) / event.total,
-                );
-
-                setImageProgress((previous) =>
-                  previous.map((value, i) =>
-                    i === index ? percentage : value,
-                  ),
-                );
-              }
-            },
-          },
-        );
-
-        if (!response.data?.success || !response.data?.imageUrl) {
-          throw new Error(
-            response.data?.message || `Image ${index + 1} upload failed`,
-          );
-        }
-
-        uploadedImageUrls[index] = response.data.imageUrl;
-
-        setImageProgress((previous) =>
-          previous.map((value, i) => (i === index ? 100 : value)),
-        );
-
-        setImageStatus((previous) =>
-          previous.map((status, i) => (i === index ? "uploaded" : status)),
-        );
-      }
-
-      // Remove empty image slots
-      const finalImages = uploadedImageUrls.filter(Boolean);
-
-      // Product data
       const productData = {
         name: name.trim(),
         description: description.trim(),
@@ -338,7 +403,7 @@ const EditProduct = ({ token }) => {
         imageUrls: finalImages,
       };
 
-      // Update product
+      // Only update product details. No image upload here.
       const response = await axios.put(
         `${backendUrl}/api/product/update/${id}`,
         productData,
@@ -370,12 +435,11 @@ const EditProduct = ({ token }) => {
     }
   };
 
+  // Input styles
   const inputClass =
     "w-full mt-2 px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10";
 
   const labelClass = "block text-sm font-semibold text-slate-700";
-
-  const selectedCount = images.filter(Boolean).length;
 
   // Loading page
   if (fetching) {
@@ -432,8 +496,9 @@ const EditProduct = ({ token }) => {
 
             <div>
               <h2 className="font-bold text-slate-800">Product Images</h2>
+
               <p className="text-xs text-slate-500 mt-0.5">
-                Keep, replace or remove images. Upload up to four images.
+                Keep, replace or remove images. Up to four images.
               </p>
             </div>
           </div>
@@ -445,6 +510,7 @@ const EditProduct = ({ token }) => {
                 <p className="text-sm font-semibold text-slate-700">
                   Images Selected
                 </p>
+
                 <p className="text-xs text-slate-500 mt-1">
                   {selectedCount} of 4 images selected
                 </p>
@@ -459,6 +525,7 @@ const EditProduct = ({ token }) => {
                     }}
                   />
                 </div>
+
                 <span className="text-xs font-bold text-emerald-600">
                   {selectedCount}/4
                 </span>
@@ -480,7 +547,7 @@ const EditProduct = ({ token }) => {
                     {img ? (
                       <>
                         <img
-                          src={preview(img)}
+                          src={imagePreviews[index]}
                           alt={`Product ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -499,16 +566,17 @@ const EditProduct = ({ token }) => {
                             {imageStatus[index] === "uploaded" ? (
                               <span className="flex items-center gap-1">
                                 <FiCheck size={14} />
-                                Uploaded
+                                Uploaded Successfully
                               </span>
                             ) : imageStatus[index] === "error" ? (
-                              "Upload Failed"
+                              <span>Upload Failed - Select Again</span>
                             ) : (
                               <>
                                 <span>Uploading {imageProgress[index]}%</span>
+
                                 <div className="w-full h-1.5 bg-white/30 rounded-full overflow-hidden">
                                   <div
-                                    className="h-full bg-white rounded-full transition-all"
+                                    className="h-full bg-white rounded-full transition-all duration-200"
                                     style={{
                                       width: `${imageProgress[index]}%`,
                                     }}
@@ -528,6 +596,7 @@ const EditProduct = ({ token }) => {
                         <span className="text-sm font-semibold text-slate-600">
                           Upload Image
                         </span>
+
                         <span className="text-xs text-slate-400 mt-1">
                           Image {index + 1}
                         </span>
@@ -539,7 +608,7 @@ const EditProduct = ({ token }) => {
                       accept="image/*"
                       hidden
                       id={`edit-image-${index}`}
-                      disabled={loading}
+                      disabled={loading || imageStatus[index] === "uploading"}
                       onChange={(e) => handleImageChange(e, index)}
                     />
                   </label>
@@ -549,7 +618,7 @@ const EditProduct = ({ token }) => {
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      disabled={loading}
+                      disabled={loading || imageStatus[index] === "uploading"}
                       className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-red-500 shadow-md flex items-center justify-center hover:bg-red-50 transition disabled:opacity-50"
                       title="Remove image"
                     >
@@ -563,6 +632,14 @@ const EditProduct = ({ token }) => {
                 </div>
               ))}
             </div>
+
+            <div className="mt-5 p-3 rounded-xl bg-blue-50 border border-blue-100">
+              <p className="text-xs text-blue-700">
+                <strong>Note:</strong> Existing images are kept automatically.
+                New images upload to Cloudinary immediately after selection.
+                Wait until uploads finish before updating the product.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -575,6 +652,7 @@ const EditProduct = ({ token }) => {
 
             <div>
               <h2 className="font-bold text-slate-800">Basic Information</h2>
+
               <p className="text-xs text-slate-500 mt-0.5">
                 Update product name and description.
               </p>
@@ -584,6 +662,7 @@ const EditProduct = ({ token }) => {
           <div className="p-5 sm:p-7 space-y-5">
             <div>
               <label className={labelClass}>Product Name</label>
+
               <input
                 type="text"
                 required
@@ -596,6 +675,7 @@ const EditProduct = ({ token }) => {
 
             <div>
               <label className={labelClass}>Product Description</label>
+
               <textarea
                 required
                 rows={5}
@@ -617,6 +697,7 @@ const EditProduct = ({ token }) => {
 
             <div>
               <h2 className="font-bold text-slate-800">Category & Pricing</h2>
+
               <p className="text-xs text-slate-500 mt-0.5">
                 Organize your product and update its selling price.
               </p>
@@ -626,6 +707,7 @@ const EditProduct = ({ token }) => {
           <div className="p-5 sm:p-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
               <label className={labelClass}>Category</label>
+
               <select
                 required
                 value={category}
@@ -642,6 +724,7 @@ const EditProduct = ({ token }) => {
 
             <div>
               <label className={labelClass}>Product Type</label>
+
               <select
                 required
                 value={subCategory}
@@ -688,6 +771,7 @@ const EditProduct = ({ token }) => {
 
             <div>
               <h2 className="font-bold text-slate-800">Inventory & Options</h2>
+
               <p className="text-xs text-slate-500 mt-0.5">
                 Manage availability, sizes and product highlights.
               </p>
@@ -695,12 +779,13 @@ const EditProduct = ({ token }) => {
           </div>
 
           <div className="p-5 sm:p-7 space-y-7">
-            {/* Stock */}
+            {/* Stock availability */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
               <div>
                 <h3 className="text-sm font-semibold text-slate-800">
                   Stock Availability
                 </h3>
+
                 <p className="text-xs text-slate-500 mt-1">
                   Set whether customers can currently purchase this product.
                 </p>
@@ -728,6 +813,7 @@ const EditProduct = ({ token }) => {
                   inStock ? "bg-emerald-500" : "bg-red-400"
                 }`}
               />
+
               <span className="text-sm text-slate-600">
                 Current status:{" "}
                 <strong
@@ -738,7 +824,7 @@ const EditProduct = ({ token }) => {
               </span>
             </div>
 
-            {/* Dynamic sizes */}
+            {/* Sizes */}
             {showSizes && (
               <div>
                 <h3 className="text-sm font-semibold text-slate-800 mb-1">
@@ -779,6 +865,7 @@ const EditProduct = ({ token }) => {
                   <h3 className="text-sm font-semibold text-slate-800">
                     Mark as Bestseller
                   </h3>
+
                   <p className="text-xs text-slate-500 mt-1">
                     Highlight this product as a popular item.
                   </p>
@@ -799,7 +886,7 @@ const EditProduct = ({ token }) => {
           </div>
         </section>
 
-        {/* Submit actions */}
+        {/* Submit buttons */}
         <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-2">
           <button
             type="button"
@@ -812,13 +899,13 @@ const EditProduct = ({ token }) => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || isUploading}
             className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? (
+            {loading || isUploading ? (
               <>
                 <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Updating Product...
+                {isUploading ? "Uploading Images..." : "Updating Product..."}
               </>
             ) : (
               <>
