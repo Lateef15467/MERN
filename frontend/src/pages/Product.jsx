@@ -203,11 +203,6 @@ const Product = () => {
               )}
             </div>
 
-            {/* Short description */}
-            <p className="mt-5 text-sm sm:text-base leading-7 text-gray-500">
-              {producData.description}
-            </p>
-
             {/* Size selection */}
             <div className="mt-7">
               <div className="flex items-center justify-between mb-3">
