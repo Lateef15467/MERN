@@ -7,6 +7,7 @@ import { sendEmail } from "../utils/SendEmail.js";
 import dotenv from "dotenv";
 import userModel from "../models/userModel.js";
 import VerifyOtp from "../models/VerifyOtp.js";
+import { sendAdminNotification } from "../utils/SendAdminNotification.js";
 dotenv.config();
 
 // Temporary store for reset tokens
@@ -324,6 +325,20 @@ const registerUser = async (req, res) => {
     });
 
     const user = await newUser.save();
+    // Notify admin about new customer registration
+    if (user.role === "user") {
+      await sendAdminNotification({
+        subject: "New Customer Registration - BaltiMart",
+        title: "New Customer Registered!",
+        message: "A new customer has created an account on your store.",
+        details: [
+          { label: "Customer Name", value: user.name },
+          { label: "Customer Email", value: user.email },
+          { label: "Registration Status", value: "Pending Email Verification" },
+          { label: "Registration Date", value: new Date().toLocaleString() },
+        ],
+      });
+    }
 
     /* ---------------------- Generate OTP ---------------------- */
     const otp = Math.floor(100000 + Math.random() * 900000).toString();

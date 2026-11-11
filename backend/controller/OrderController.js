@@ -2,6 +2,7 @@ import orderModel from "../models/OrderModel.js";
 import userModel from "../models/userModel.js";
 import { generatejazzcashHash } from "../utils/jazzcashHelper.js";
 import { sendOrderEmail } from "../utils/SendOrderEmail.js";
+import { sendAdminNotification } from "../utils/SendAdminNotification.js";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -34,6 +35,19 @@ export const placeOrder = async (req, res) => {
     // Save order
     const newOrder = new orderModel(orderData);
     await newOrder.save();
+    await sendAdminNotification({
+      subject: "New COD Order - BaltiMart",
+      title: "New Order Received!",
+      message: "A customer has placed a new Cash on Delivery order.",
+      details: [
+        { label: "Order ID", value: newOrder._id },
+        { label: "Customer Name", value: user.name },
+        { label: "Customer Email", value: user.email },
+        { label: "Amount", value: `PKR ${amount}` },
+        { label: "Payment Method", value: "Cash on Delivery" },
+        { label: "Order Status", value: newOrder.status || "order placed" },
+      ],
+    });
 
     // Clear user's cart
     await userModel.findByIdAndUpdate(userId, { cartData: {} });
