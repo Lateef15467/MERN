@@ -11,7 +11,6 @@ import {
   FiUserPlus,
   FiX,
   FiTrash2,
-  FiCheck,
 } from "react-icons/fi";
 
 import { assets } from "../../../frontend/src/assets/frontend_assets/assets";
@@ -86,13 +85,11 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
         );
 
         const currentOrderIds = orders.map((order) => String(order._id));
-
         const currentUserIds = users.map((user) => String(user._id));
 
         const savedOrderIds = localStorage.getItem(ORDER_KEY);
         const savedUserIds = localStorage.getItem(USER_KEY);
 
-        // First visit: establish baseline without old notifications
         if (savedOrderIds === null || savedUserIds === null) {
           localStorage.setItem(ORDER_KEY, JSON.stringify(currentOrderIds));
           localStorage.setItem(USER_KEY, JSON.stringify(currentUserIds));
@@ -145,7 +142,6 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
         }
 
         localStorage.setItem(ORDER_KEY, JSON.stringify(currentOrderIds));
-
         localStorage.setItem(USER_KEY, JSON.stringify(currentUserIds));
       } catch (error) {
         console.error(
@@ -194,10 +190,7 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
   // Mark all as read
   const markAllAsRead = () => {
     setNotifications((previous) =>
-      previous.map((item) => ({
-        ...item,
-        isRead: true,
-      })),
+      previous.map((item) => ({ ...item, isRead: true })),
     );
   };
 
@@ -228,30 +221,30 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 h-[72px] w-full border-b border-gray-200 bg-white">
-      <div className="flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 h-[64px] w-full border-b border-gray-200 bg-white sm:h-[72px]">
+      <div className="flex h-full items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-8">
         {/* Logo and Menu */}
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={onMenuClick}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-700 transition hover:bg-gray-100 lg:hidden"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition hover:bg-gray-100 sm:h-10 sm:w-10 lg:hidden"
             aria-label="Open navigation menu"
           >
-            <FiMenu size={21} />
+            <FiMenu size={20} />
           </button>
 
-          <Link to="/add" className="flex items-center">
+          <Link to="/add" className="flex min-w-0 items-center">
             <img
               src={assets.logo}
               alt="Logo"
-              className="h-9 w-auto max-w-[145px] object-contain sm:h-10"
+              className="h-8 w-auto max-w-[105px] object-contain sm:h-10 sm:max-w-[145px]"
             />
           </Link>
 
-          <div className="hidden h-8 w-px bg-gray-200 sm:block" />
+          <div className="hidden h-8 w-px bg-gray-200 md:block" />
 
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <p className="text-sm font-semibold tracking-tight text-gray-800">
               Management Portal
             </p>
@@ -262,16 +255,16 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center gap-3 sm:gap-5">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
           {/* Notification Bell */}
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setShowNotifications((prev) => !prev)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-700 transition hover:bg-gray-100"
+              className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition hover:bg-gray-100 sm:h-10 sm:w-10"
               aria-label="Notifications"
             >
-              <FiBell size={21} />
+              <FiBell size={19} />
 
               {unreadCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
@@ -282,10 +275,10 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
 
             {/* Notification Dropdown */}
             {showNotifications && (
-              <div className="absolute right-0 top-14 z-50 w-[340px] max-w-[calc(100vw-24px)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:w-[390px]">
+              <div className="fixed left-3 right-3 top-[70px] z-50 mx-auto max-h-[calc(100vh-85px)] w-auto overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-14 sm:mx-0 sm:max-h-none sm:w-[390px]">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
-                  <div>
+                <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-3 sm:px-4 sm:py-4">
+                  <div className="min-w-0">
                     <h3 className="text-sm font-bold text-gray-900">
                       Notifications
                     </h3>
@@ -294,11 +287,11 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
-                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                        className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-800 sm:text-xs"
                       >
                         Mark all read
                       </button>
@@ -307,7 +300,7 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
                     {notifications.length > 0 && (
                       <button
                         onClick={clearAllNotifications}
-                        className="text-xs font-semibold text-red-500 hover:text-red-700"
+                        className="text-[10px] font-semibold text-red-500 hover:text-red-700 sm:text-xs"
                       >
                         Clear all
                       </button>
@@ -324,7 +317,7 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
                 </div>
 
                 {/* Notifications List */}
-                <div className="max-h-[380px] overflow-y-auto">
+                <div className="max-h-[calc(100vh-190px)] overflow-y-auto sm:max-h-[380px]">
                   {notifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
                       <FiBell size={30} className="mb-3 text-gray-300" />
@@ -339,26 +332,25 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
                     notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`flex items-start gap-3 border-b border-gray-100 px-4 py-4 transition hover:bg-gray-50 ${
+                        className={`flex items-start gap-2 border-b border-gray-100 px-3 py-3 transition hover:bg-gray-50 sm:gap-3 sm:px-4 sm:py-4 ${
                           !notification.isRead ? "bg-indigo-50/50" : ""
                         }`}
                       >
-                        {/* Notification Content */}
                         <button
                           onClick={() => handleNotificationClick(notification)}
-                          className="flex min-w-0 flex-1 items-start gap-3 text-left"
+                          className="flex min-w-0 flex-1 items-start gap-2 text-left sm:gap-3"
                         >
                           <span
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10 ${
                               notification.type === "order"
                                 ? "bg-green-100 text-green-600"
                                 : "bg-blue-100 text-blue-600"
                             }`}
                           >
                             {notification.type === "order" ? (
-                              <FiShoppingBag size={19} />
+                              <FiShoppingBag size={18} />
                             ) : (
-                              <FiUserPlus size={19} />
+                              <FiUserPlus size={18} />
                             )}
                           </span>
 
@@ -373,7 +365,7 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
                               )}
                             </span>
 
-                            <span className="mt-1 block text-xs leading-5 text-gray-500">
+                            <span className="mt-1 block break-words text-xs leading-5 text-gray-500">
                               {notification.message}
                             </span>
 
@@ -383,7 +375,6 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
                           </span>
                         </button>
 
-                        {/* Delete Button */}
                         <button
                           type="button"
                           onClick={() => deleteNotification(notification.id)}
@@ -391,7 +382,7 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
                           title="Delete notification"
                           aria-label="Delete notification"
                         >
-                          <FiTrash2 size={16} />
+                          <FiTrash2 size={15} />
                         </button>
                       </div>
                     ))
@@ -399,9 +390,9 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-gray-100 px-4 py-3 text-center">
+                <div className="border-t border-gray-100 px-3 py-3 text-center sm:px-4">
                   <p className="text-[10px] text-gray-400">
-                    Automatically checking every 15 seconds
+                    Checking every 15 seconds
                     {loadingNotifications ? " • Updating..." : ""}
                   </p>
                 </div>
@@ -427,10 +418,10 @@ const Navbar = ({ settoken, role, onMenuClick }) => {
           <button
             type="button"
             onClick={settoken}
-            className="flex items-center gap-2 rounded-xl bg-gray-900 px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 sm:px-4 sm:text-sm"
+            className="flex h-9 items-center gap-1.5 rounded-lg bg-gray-900 px-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 sm:h-auto sm:gap-2 sm:rounded-xl sm:px-4 sm:py-2.5 sm:text-sm"
           >
-            <FiLogOut size={16} />
-            <span className="hidden xs:inline">Logout</span>
+            <FiLogOut size={15} />
+            <span>Logout</span>
           </button>
         </div>
       </div>
