@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+
 import Home from "./pages/Home";
 import Collection from "./pages/Collection";
 import About from "./pages/About";
@@ -18,30 +19,32 @@ import PaymentFailed from "./pages/PaymentFailed";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyOtp from "./pages/VerifyOtp";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import ScrollToTop from "./components/ScrollToTop";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   return (
-    <div className=" px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-      <ToastContainer></ToastContainer>
-      <Navbar></Navbar>
-      <SearchBar></SearchBar>
+    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      <ToastContainer />
+
+      <Navbar />
+
+      <SearchBar />
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Home></Home>}></Route>
-        <Route path="/collection" element={<Collection></Collection>}></Route>
-        <Route path="/about" element={<About></About>}></Route>
-        <Route path="/contact" element={<Contact></Contact>}></Route>
-        <Route path="/product/:productId" element={<Product></Product>}></Route>
-        <Route path="/cart" element={<Cart></Cart>}></Route>
-        <Route path="/login" element={<Login></Login>}></Route>
-        <Route path="/place-order" element={<PlaceOrder></PlaceOrder>}></Route>
-        <Route path="/orders" element={<Order></Order>} />
-        <Route path="/profile" element={<Profile></Profile>} />
+        <Route path="/" element={<Home />} />
+        <Route path="/collection" element={<Collection />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/product/:productId" element={<Product />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/place-order" element={<PlaceOrder />} />
+        <Route path="/orders" element={<Order />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-failed" element={<PaymentFailed />} />
         <Route path="/payment-error" element={<PaymentFailed />} />
@@ -51,6 +54,7 @@ const App = () => {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
       </Routes>
+
       <Footer />
     </div>
   );
