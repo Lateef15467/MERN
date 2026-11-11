@@ -13,6 +13,7 @@ import {
   toggleBlockUser,
   deleteUser,
 } from "../controller/UserController.js";
+import vendorAuth from "../middleware/vendorAuth.js";
 
 const userRouter = express.Router();
 
@@ -27,7 +28,7 @@ userRouter.post("/resend-otp", resendOtp);
 
 // LIST routes first
 userRouter.put("/block/:id", toggleBlockUser);
-userRouter.get("/users", getAllUsers);
+userRouter.get("/users", vendorAuth, getAllUsers);
 userRouter.get("/users/:id", getUserById);
 userRouter.delete("/delete/:id", deleteUser);
 
