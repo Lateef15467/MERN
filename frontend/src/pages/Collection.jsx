@@ -1,17 +1,50 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useNavigationType } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
 import { FiFilter, FiShoppingBag, FiChevronDown } from "react-icons/fi";
 
+const FILTER_STORAGE_KEY = "collection-filters";
+
+const DEFAULT_FILTERS = {
+  category: [],
+  subCategory: [],
+  sortType: "relevant",
+};
+
+// Read saved filters (used only when coming back with Back / Forward)
+const readSavedFilters = () => {
+  try {
+    const raw = sessionStorage.getItem(FILTER_STORAGE_KEY);
+    if (!raw) return DEFAULT_FILTERS;
+
+    const parsed = JSON.parse(raw);
+
+    return {
+      category: Array.isArray(parsed?.category) ? parsed.category : [],
+      subCategory: Array.isArray(parsed?.subCategory) ? parsed.subCategory : [],
+      sortType:
+        typeof parsed?.sortType === "string" ? parsed.sortType : "relevant",
+    };
+  } catch (error) {
+    return DEFAULT_FILTERS;
+  }
+};
+
 const Collection = () => {
   const { products, search, showsearch } = useContext(ShopContext);
+  const navigationType = useNavigationType();
+
+  // Back / Forward keeps the previous filters; a fresh visit starts clean
+  const [initialFilters] = useState(() =>
+    navigationType === "POP" ? readSavedFilters() : DEFAULT_FILTERS,
+  );
 
   const [showFilters, setshowFilters] = useState(false);
-  const [filterProducts, setFilterProducts] = useState([]);
-  const [category, setCategory] = useState([]);
-  const [subCategory, setsubCategory] = useState([]);
-  const [sortType, setsortType] = useState("relevant");
+  const [category, setCategory] = useState(initialFilters.category);
+  const [subCategory, setsubCategory] = useState(initialFilters.subCategory);
+  const [sortType, setsortType] = useState(initialFilters.sortType);
 
   const isSearchMode = Boolean(showsearch);
 
@@ -59,6 +92,18 @@ const Collection = () => {
     "Automotive Accessories",
   ];
 
+  // Save filters so Back can restore them
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        FILTER_STORAGE_KEY,
+        JSON.stringify({ category, subCategory, sortType }),
+      );
+    } catch (error) {
+      // Storage can be unavailable; ignore
+    }
+  }, [category, subCategory, sortType]);
+
   // Toggle category
   const toggleCategory = (e) => {
     const value = e.target.value;
@@ -81,8 +126,9 @@ const Collection = () => {
     }
   };
 
-  // Apply filters and sorting
-  const applyFilter = () => {
+  // Apply filters and sorting (calculated during render, so the list is
+  // ready on the very first paint and the page height never jumps)
+  const filterProducts = useMemo(() => {
     let productsCopy = Array.isArray(products) ? [...products] : [];
 
     // Search filter
@@ -113,12 +159,8 @@ const Collection = () => {
       productsCopy.sort((a, b) => b.price - a.price);
     }
 
-    setFilterProducts(productsCopy);
-  };
-
-  useEffect(() => {
-    applyFilter();
-  }, [category, subCategory, search, showsearch, products, sortType]);
+    return productsCopy;
+  }, [products, search, showsearch, category, subCategory, sortType]);
 
   // Clear all filters
   const clearFilters = () => {
