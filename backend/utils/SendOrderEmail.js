@@ -50,7 +50,7 @@ ${productDetails}
 Total Amount: Rs. ${amount}
 
 You can visit our website:
-https://baltimart.vercel.app/
+https://baltimart.com/
 
 Thank you for shopping with BaltiMart.
 
@@ -123,8 +123,8 @@ BaltiMart Team
 
           <p>
             Website:
-            <a href="https://baltimart.vercel.app/">
-              https://baltimart.vercel.app/
+            <a href="https://baltimart.com/">
+              https://baltimart.com/
             </a>
           </p>
 
