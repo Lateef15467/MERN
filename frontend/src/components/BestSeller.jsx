@@ -1,15 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useMemo } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
 
 const BestSeller = () => {
   const { products } = useContext(ShopContext);
-  const [bestseller, setBestseller] = useState([]);
 
-  useEffect(() => {
-    const bestProducts = products.filter((item) => item.bestseller);
-    setBestseller(bestProducts.slice(0, 5));
+  // Calculated during render (not in an effect), so the grid is present on
+  // the very first paint and the page height never jumps when coming Back
+  const bestseller = useMemo(() => {
+    if (!Array.isArray(products)) return [];
+
+    return products.filter((item) => item.bestseller).slice(0, 5);
   }, [products]);
 
   return (

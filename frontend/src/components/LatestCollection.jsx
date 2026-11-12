@@ -1,14 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useMemo } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
 
 const LatestCollection = () => {
   const { products } = useContext(ShopContext);
-  const [latestProducts, setLatestProducts] = useState([]);
 
-  useEffect(() => {
-    setLatestProducts(products.slice(0, 10));
+  // Calculated during render (not in an effect), so the grid is present on
+  // the very first paint and the page height never jumps when coming Back
+  const latestProducts = useMemo(() => {
+    if (!Array.isArray(products)) return [];
+
+    return products.slice(0, 10);
   }, [products]);
 
   return (

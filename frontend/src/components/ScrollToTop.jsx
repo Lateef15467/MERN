@@ -6,6 +6,11 @@ const STORAGE_PREFIX = "scroll-pos:";
 // How long to wait for the page to grow tall enough before giving up
 const MAX_RESTORE_WAIT_MS = 1500;
 
+// After restoring, keep the position steady for a moment so late layout
+// shifts or stray scroll calls from other code cannot move the page.
+// Any user input cancels this immediately.
+const HOLD_MS = 1000;
+
 // Jump instantly, even if the site CSS has `scroll-behavior: smooth`
 const jumpTo = (top) => {
   const root = document.documentElement;
@@ -131,6 +136,7 @@ const ScrollToTop = () => {
 
     const target = Number(saved) || 0;
     const startedAt = performance.now();
+    let reachedAt = null;
 
     // If the person scrolls or interacts, stop immediately
     userEvents.forEach((name) =>
@@ -141,20 +147,29 @@ const ScrollToTop = () => {
       frame = null;
       if (finished) return;
 
-      const maxScroll = getMaxScroll();
+      const now = performance.now();
 
-      // Page is tall enough: jump once and stop
-      if (maxScroll >= target) {
-        jumpTo(target);
-        finish();
-        return;
-      }
+      if (reachedAt === null) {
+        // Waiting for the page to become tall enough
+        if (getMaxScroll() >= target) {
+          jumpTo(target);
+          reachedAt = now;
+        } else if (now - startedAt > MAX_RESTORE_WAIT_MS) {
+          // Page never got tall enough: settle at the lowest reachable point
+          jumpTo(getMaxScroll());
+          finish();
+          return;
+        }
+      } else {
+        // Position reached: if something else moved the page, put it back
+        if (Math.abs(window.scrollY - target) > 2 && getMaxScroll() >= target) {
+          jumpTo(target);
+        }
 
-      // Page is still loading: wait, then settle at the lowest reachable point
-      if (performance.now() - startedAt > MAX_RESTORE_WAIT_MS) {
-        jumpTo(maxScroll);
-        finish();
-        return;
+        if (now - reachedAt > HOLD_MS) {
+          finish();
+          return;
+        }
       }
 
       frame = requestAnimationFrame(tick);
