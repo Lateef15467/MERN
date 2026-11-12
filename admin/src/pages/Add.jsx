@@ -539,15 +539,6 @@ const Add = ({ token }) => {
                 </div>
               ))}
             </div>
-
-            {/* Upload information */}
-            <div className="mt-5 p-3 rounded-xl bg-blue-50 border border-blue-100">
-              <p className="text-xs text-blue-700">
-                <strong>Note:</strong> Each image uploads to Cloudinary
-                immediately after selection. Wait until all selected images show
-                "Uploaded Successfully" before adding your product.
-              </p>
-            </div>
           </div>
         </section>
 
