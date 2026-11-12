@@ -38,8 +38,7 @@ const Navbar = () => {
 
   // Admin dashboard URL
   const ADMIN_URL =
-    import.meta.env.VITE_ADMIN_URL ||
-    "https://baltimart-admins.vercel.app/login";
+    import.meta.env.VITE_ADMIN_URL || "https://admin.baltimart.com/login";
 
   // Check user role
   const isAdmin = ["admin", "vendor"].includes(user?.role);
