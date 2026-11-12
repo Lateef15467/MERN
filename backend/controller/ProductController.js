@@ -168,6 +168,7 @@ const getProductById = async (req, res) => {
 };
 
 // Update product
+
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -189,6 +190,7 @@ const updateProduct = async (req, res) => {
       bestseller,
       Sizes,
       inStock,
+      imageUrls,
     } = req.body;
 
     if (name !== undefined) product.name = name;
@@ -222,34 +224,28 @@ const updateProduct = async (req, res) => {
       }
     }
 
-    let images = Array.isArray(product.image) ? [...product.image] : [];
+    // Update images using Cloudinary URLs sent by frontend
+    if (imageUrls !== undefined) {
+      let parsedImages =
+        typeof imageUrls === "string" ? JSON.parse(imageUrls) : imageUrls;
 
-    const files = req.files || {};
-
-    for (let i = 1; i <= 4; i++) {
-      const field = `image${i}`;
-
-      if (files[field] && files[field][0]) {
-        const file = files[field][0];
-
-        const result = await cloudinary.uploader.upload(file.path, {
-          resource_type: "image",
-          folder: "BaltiMart/products",
+      if (!Array.isArray(parsedImages)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid imageUrls format",
         });
-
-        images[i - 1] = result.secure_url;
-      } else if (req.body[`removeImage${i}`] === "true") {
-        images[i - 1] = undefined;
       }
-    }
 
-    product.image = images.filter((url) => url !== undefined && url !== null);
+      product.image = parsedImages.filter(
+        (url) => typeof url === "string" && url.trim() !== "",
+      );
+    }
 
     await product.save();
 
     return res.json({
       success: true,
-      message: "Product updated",
+      message: "Product updated successfully",
       product,
     });
   } catch (error) {
