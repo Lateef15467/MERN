@@ -23,8 +23,7 @@ orderRouter.post("/status", vendorAuth, updateStatus);
 
 // User routes
 orderRouter.post("/place", authUser, placeOrder);
-orderRouter.post("/userorders", authUser, userOrders);
-
+orderRouter.post("/userorders", adminAuth, userOrders);
 // Payments
 orderRouter.post("/placeEasypaisa", authUser, placeOrderEasypaise);
 orderRouter.post("/initiatejazzcash", authUser, initiatejazzcash);

@@ -80,10 +80,25 @@ export const allOrders = async (req, res) => {
 export const userOrders = async (req, res) => {
   try {
     const { userId } = req.body;
-    const orders = await orderModel.find({ userId });
-    res.json({ success: true, orders });
+
+    if (!userId) {
+      return res.json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const orders = await orderModel.find({ userId }).sort({ date: -1 });
+
+    res.json({
+      success: true,
+      orders,
+    });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    res.json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
