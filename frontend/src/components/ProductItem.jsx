@@ -88,7 +88,7 @@ const ProductItem = ({ id, image, name, price, inStock }) => {
         <div className="flex flex-wrap items-baseline gap-1">
           <span className="text-base font-bold text-gray-900 sm:text-lg">
             {currency}
-            {price}
+            {price.toLocaleString("en-US")}
           </span>
           <span className="text-xs font-medium text-gray-500">PKR</span>
         </div>
