@@ -188,37 +188,6 @@ const Collection = () => {
 
   return (
     <section className="mx-auto max-w-[1600px] px-3 pb-6 pt-2 sm:px-6 sm:pt-8 sm:pb-12 lg:px-10">
-      {/* Collection Banner */}
-      {!isSearchMode && (
-        <div className="relative mb-8 overflow-hidden rounded-2xl bg-gray-900 px-5 py-9 text-white sm:mb-10 sm:px-10 sm:py-12 lg:px-14">
-          <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-orange-500/20 blur-3xl" />
-          <div className="absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-orange-400/10 blur-3xl" />
-
-          <div className="relative z-10 flex flex-col items-center justify-between gap-7 sm:flex-row">
-            <div className="max-w-xl text-center sm:text-left">
-              <span className="mb-3 inline-block rounded-full border border-orange-400/30 bg-orange-500/10 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-orange-300 sm:text-xs">
-                Discover BaltiMart
-              </span>
-
-              <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
-                Find Your Next
-                <span className="block text-orange-400">Favorite Thing.</span>
-              </h1>
-
-              <p className="mt-4 max-w-lg text-xs leading-6 text-gray-300 sm:text-sm sm:leading-7">
-                Explore a wide range of products for your everyday needs.
-                Discover more choices and enjoy convenient shopping in one
-                place.
-              </p>
-            </div>
-
-            <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 sm:h-36 sm:w-36 lg:h-40 lg:w-40">
-              <FiShoppingBag className="text-orange-400" size={60} />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Collection Area */}
       <div className="flex flex-col gap-2 sm:gap-5 lg:flex-row lg:gap-7">
         {/* Filter Sidebar */}
