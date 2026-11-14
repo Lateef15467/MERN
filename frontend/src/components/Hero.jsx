@@ -15,8 +15,12 @@ const Hero = () => {
     assets.hero7,
   ];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Select a random starting image
+  const [currentIndex, setCurrentIndex] = useState(() =>
+    Math.floor(Math.random() * 8),
+  );
 
+  // Automatic image slider
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % heroImages.length);
@@ -127,7 +131,7 @@ const Hero = () => {
                     <img
                       src={img}
                       alt={`BaltiMart featured products ${index + 1}`}
-                      loading={index === 0 ? "eager" : "lazy"}
+                      loading={index === currentIndex ? "eager" : "lazy"}
                       className="h-[270px] w-full object-contain drop-shadow-2xl sm:h-[350px] lg:h-[410px] xl:h-[440px]"
                     />
                   </div>

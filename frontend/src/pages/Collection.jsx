@@ -13,6 +13,19 @@ const DEFAULT_FILTERS = {
   sortType: "relevant",
 };
 
+// Randomly shuffle products using Fisher-Yates algorithm
+const shuffleProducts = (products) => {
+  const shuffled = [...products];
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
+
 // Read saved filters (used only when coming back with Back / Forward)
 const readSavedFilters = () => {
   try {
@@ -36,7 +49,7 @@ const Collection = () => {
   const { products, search, showsearch } = useContext(ShopContext);
   const navigationType = useNavigationType();
 
-  // Back / Forward keeps the previous filters; a fresh visit starts clean
+  // Back / Forward keeps previous filters; fresh visit starts clean
   const [initialFilters] = useState(() =>
     navigationType === "POP" ? readSavedFilters() : DEFAULT_FILTERS,
   );
@@ -126,7 +139,7 @@ const Collection = () => {
     }
   };
 
-  // Apply filters and sorting
+  // Apply search, filters, random ordering and sorting
   const filterProducts = useMemo(() => {
     let productsCopy = Array.isArray(products) ? [...products] : [];
 
@@ -156,6 +169,9 @@ const Collection = () => {
       productsCopy.sort((a, b) => a.price - b.price);
     } else if (sortType === "high-low") {
       productsCopy.sort((a, b) => b.price - a.price);
+    } else {
+      // Random order for Most Relevant
+      productsCopy = shuffleProducts(productsCopy);
     }
 
     return productsCopy;

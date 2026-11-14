@@ -3,15 +3,27 @@ import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
 
+// Randomly shuffle products
+const shuffleProducts = (products) => {
+  const shuffled = [...products];
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
+
 const LatestCollection = () => {
   const { products } = useContext(ShopContext);
 
-  // Calculated during render (not in an effect), so the grid is present on
-  // the very first paint and the page height never jumps when coming Back
+  // Randomly select 10 products
   const latestProducts = useMemo(() => {
     if (!Array.isArray(products)) return [];
 
-    return products.slice(0, 10);
+    return shuffleProducts(products).slice(0, 10);
   }, [products]);
 
   return (
