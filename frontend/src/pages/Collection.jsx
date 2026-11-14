@@ -6,6 +6,7 @@ import ProductItem from "../components/ProductItem";
 import { FiFilter, FiShoppingBag, FiChevronDown } from "react-icons/fi";
 
 const FILTER_STORAGE_KEY = "collection-filters";
+const PRODUCTS_PER_PAGE = 12;
 
 const DEFAULT_FILTERS = {
   category: [],
@@ -19,14 +20,13 @@ const shuffleProducts = (products) => {
 
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
   return shuffled;
 };
 
-// Read saved filters (used only when coming back with Back / Forward)
+// Read saved filters
 const readSavedFilters = () => {
   try {
     const raw = sessionStorage.getItem(FILTER_STORAGE_KEY);
@@ -49,7 +49,7 @@ const Collection = () => {
   const { products, search, showsearch } = useContext(ShopContext);
   const navigationType = useNavigationType();
 
-  // Back / Forward keeps previous filters; fresh visit starts clean
+  // Restore filters on Back / Forward navigation
   const [initialFilters] = useState(() =>
     navigationType === "POP" ? readSavedFilters() : DEFAULT_FILTERS,
   );
@@ -58,6 +58,9 @@ const Collection = () => {
   const [category, setCategory] = useState(initialFilters.category);
   const [subCategory, setsubCategory] = useState(initialFilters.subCategory);
   const [sortType, setsortType] = useState(initialFilters.sortType);
+
+  // Load More Products state
+  const [visibleProducts, setVisibleProducts] = useState(PRODUCTS_PER_PAGE);
 
   const isSearchMode = Boolean(showsearch);
 
@@ -113,9 +116,14 @@ const Collection = () => {
         JSON.stringify({ category, subCategory, sortType }),
       );
     } catch (error) {
-      // Storage can be unavailable; ignore
+      // Ignore storage errors
     }
   }, [category, subCategory, sortType]);
+
+  // Reset visible products when search, filters, or sorting changes
+  useEffect(() => {
+    setVisibleProducts(PRODUCTS_PER_PAGE);
+  }, [search, showsearch, category, subCategory, sortType]);
 
   // Toggle category
   const toggleCategory = (e) => {
@@ -182,6 +190,13 @@ const Collection = () => {
     setCategory([]);
     setsubCategory([]);
     setsortType("relevant");
+  };
+
+  // Load 12 more products
+  const handleLoadMore = () => {
+    setVisibleProducts((prev) =>
+      Math.min(prev + PRODUCTS_PER_PAGE, filterProducts.length),
+    );
   };
 
   const activeFilterCount = category.length + subCategory.length;
@@ -333,6 +348,10 @@ const Collection = () => {
             <p className="text-xs text-gray-500 sm:text-sm">
               Showing{" "}
               <span className="font-bold text-gray-900">
+                {Math.min(visibleProducts, filterProducts.length)}
+              </span>{" "}
+              of{" "}
+              <span className="font-bold text-gray-900">
                 {filterProducts.length}
               </span>{" "}
               products
@@ -351,18 +370,33 @@ const Collection = () => {
 
           {/* Products Grid */}
           {filterProducts.length > 0 ? (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-7 md:grid-cols-3 xl:grid-cols-4">
-              {filterProducts.map((item) => (
-                <ProductItem
-                  key={item._id}
-                  name={item.name}
-                  id={item._id}
-                  image={item.image}
-                  price={item.price}
-                  inStock={item.inStock}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-7 md:grid-cols-3 xl:grid-cols-4">
+                {filterProducts.slice(0, visibleProducts).map((item) => (
+                  <ProductItem
+                    key={item._id}
+                    name={item.name}
+                    id={item._id}
+                    image={item.image}
+                    price={item.price}
+                    inStock={item.inStock}
+                  />
+                ))}
+              </div>
+
+              {/* Load More Button */}
+              {visibleProducts < filterProducts.length && (
+                <div className="mt-8 flex justify-center sm:mt-10">
+                  <button
+                    type="button"
+                    onClick={handleLoadMore}
+                    className="rounded-lg border border-gray-300 bg-white px-8 py-3 text-sm font-semibold text-gray-800 transition-all duration-200 hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+                  >
+                    Load More Products
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             /* Empty State */
             <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-10 text-center">
