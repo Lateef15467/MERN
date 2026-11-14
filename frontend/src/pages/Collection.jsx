@@ -126,8 +126,7 @@ const Collection = () => {
     }
   };
 
-  // Apply filters and sorting (calculated during render, so the list is
-  // ready on the very first paint and the page height never jumps)
+  // Apply filters and sorting
   const filterProducts = useMemo(() => {
     let productsCopy = Array.isArray(products) ? [...products] : [];
 
@@ -172,7 +171,7 @@ const Collection = () => {
   const activeFilterCount = category.length + subCategory.length;
 
   return (
-    <section className="mx-auto max-w-[1600px] px-3 pb-12 pt-5 sm:px-6 sm:pt-8 lg:px-10">
+    <section className="mx-auto max-w-[1600px] px-3 pb-6 pt-2 sm:px-6 sm:pt-8 sm:pb-12 lg:px-10">
       {/* Collection Banner */}
       {!isSearchMode && (
         <div className="relative mb-8 overflow-hidden rounded-2xl bg-gray-900 px-5 py-9 text-white sm:mb-10 sm:px-10 sm:py-12 lg:px-14">
@@ -205,7 +204,7 @@ const Collection = () => {
       )}
 
       {/* Main Collection Area */}
-      <div className="flex flex-col gap-5 lg:flex-row lg:gap-7">
+      <div className="flex flex-col gap-2 sm:gap-5 lg:flex-row lg:gap-7">
         {/* Filter Sidebar */}
         <aside className="w-full shrink-0 self-start lg:sticky lg:top-24 lg:w-64">
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -313,7 +312,7 @@ const Collection = () => {
         {/* Products Section */}
         <main className="min-w-0 flex-1">
           {/* Heading and Sorting */}
-          <div className="mb-5 flex flex-col justify-between gap-3 border-b border-gray-200 pb-4 sm:mb-6 sm:flex-row sm:items-center sm:pb-5">
+          <div className="mb-2 flex flex-col justify-between gap-1 border-b border-gray-200 pb-2 sm:mb-6 sm:flex-row sm:items-center sm:gap-3 sm:pb-5">
             <div>
               <Title
                 text1={isSearchMode ? "Search" : "Explore"}
@@ -345,7 +344,7 @@ const Collection = () => {
           </div>
 
           {/* Product Count */}
-          <div className="mb-5 flex items-center justify-between">
+          <div className="mb-2 flex items-center justify-between sm:mb-5">
             <p className="text-xs text-gray-500 sm:text-sm">
               Showing{" "}
               <span className="font-bold text-gray-900">
