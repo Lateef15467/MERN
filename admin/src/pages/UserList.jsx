@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 
 import {
   FiUsers,
-  FiUser,
   FiSearch,
   FiRefreshCw,
   FiEye,
@@ -15,13 +14,16 @@ import {
   FiUserX,
   FiMail,
   FiChevronRight,
-  FiAlertCircle,
+  FiChevronDown,
 } from "react-icons/fi";
+
+const USERS_PER_PAGE = 5;
 
 const UserList = ({ token }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [visibleCount, setVisibleCount] = useState(USERS_PER_PAGE);
 
   const navigate = useNavigate();
 
@@ -42,6 +44,7 @@ const UserList = ({ token }) => {
 
       if (response.data.success) {
         setUsers(response.data.users || []);
+        setVisibleCount(USERS_PER_PAGE);
       } else {
         toast.error(response.data.message || "Unable to fetch users");
       }
@@ -56,6 +59,11 @@ const UserList = ({ token }) => {
   useEffect(() => {
     fetchUsers();
   }, [token]);
+
+  // Reset Load More when search changes
+  useEffect(() => {
+    setVisibleCount(USERS_PER_PAGE);
+  }, [search]);
 
   // Get display name
   const getDisplayName = (user) => {
@@ -75,7 +83,7 @@ const UserList = ({ token }) => {
     return users.filter((user) => {
       const name = getDisplayName(user).toLowerCase();
       const email = (user.email || "").toLowerCase();
-      const id = (user._id || "").toLowerCase();
+      const id = String(user._id || "").toLowerCase();
       const role = (user.role || "").toLowerCase();
 
       return (
@@ -87,8 +95,24 @@ const UserList = ({ token }) => {
     });
   }, [users, search]);
 
+  // Currently visible users
+  const visibleUsers = useMemo(() => {
+    return filteredUsers.slice(0, visibleCount);
+  }, [filteredUsers, visibleCount]);
+
+  // Load More
+  const loadMoreUsers = () => {
+    setVisibleCount((prev) =>
+      Math.min(prev + USERS_PER_PAGE, filteredUsers.length),
+    );
+  };
+
+  // Remaining users
+  const remainingUsers = Math.max(filteredUsers.length - visibleCount, 0);
+
   // Statistics
   const activeUsers = users.filter((user) => !user.blocked).length;
+
   const blockedUsers = users.filter((user) => user.blocked).length;
 
   // Role styling
@@ -105,6 +129,29 @@ const UserList = ({ token }) => {
     }
   };
 
+  // Empty state
+  const EmptyUsers = ({ mobile = false }) => (
+    <div
+      className={`${
+        mobile
+          ? "bg-white border border-gray-100 rounded-2xl py-14 px-4"
+          : "py-16"
+      } text-center`}
+    >
+      <FiUsers size={35} className="mx-auto text-gray-300 mb-3" />
+
+      <h3 className="text-lg font-semibold text-gray-800">
+        {search ? "No matching users found" : "No users available"}
+      </h3>
+
+      <p className="text-sm text-gray-500 mt-2">
+        {search
+          ? "Try searching with another name, email or role."
+          : "Registered users will appear here."}
+      </p>
+    </div>
+  );
+
   // Loading
   if (loading) {
     return (
@@ -118,8 +165,7 @@ const UserList = ({ token }) => {
 
   return (
     <div className="w-full min-h-screen bg-gray-50/70 p-3 sm:p-5 lg:p-7">
-      {/* ================= HEADER ================= */}
-
+      {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2">
@@ -144,8 +190,7 @@ const UserList = ({ token }) => {
         </button>
       </div>
 
-      {/* ================= STATISTICS ================= */}
-
+      {/* STATISTICS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {/* Total Users */}
         <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5">
@@ -199,8 +244,7 @@ const UserList = ({ token }) => {
         </div>
       </div>
 
-      {/* ================= SEARCH ================= */}
-
+      {/* SEARCH */}
       <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 mb-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative w-full sm:max-w-md">
@@ -219,28 +263,15 @@ const UserList = ({ token }) => {
           </div>
 
           <p className="text-xs text-gray-400">
-            Showing {filteredUsers.length} of {users.length} users
+            Showing {visibleUsers.length} of {filteredUsers.length} users
           </p>
         </div>
       </div>
 
-      {/* ================= DESKTOP TABLE ================= */}
-
+      {/* DESKTOP TABLE */}
       <div className="hidden md:block bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
         {filteredUsers.length === 0 ? (
-          <div className="py-16 text-center">
-            <FiUsers size={35} className="mx-auto text-gray-300 mb-3" />
-
-            <h3 className="text-lg font-semibold text-gray-800">
-              {search ? "No matching users found" : "No users available"}
-            </h3>
-
-            <p className="text-sm text-gray-500 mt-2">
-              {search
-                ? "Try searching with another name, email or role."
-                : "Registered users will appear here."}
-            </p>
-          </div>
+          <EmptyUsers />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -269,7 +300,7 @@ const UserList = ({ token }) => {
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {filteredUsers.map((user) => {
+                {visibleUsers.map((user) => {
                   const displayName = getDisplayName(user);
 
                   return (
@@ -277,7 +308,7 @@ const UserList = ({ token }) => {
                       key={user._id}
                       className="hover:bg-gray-50/80 transition-colors"
                     >
-                      {/* User Name */}
+                      {/* USER NAME */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-semibold shrink-0">
@@ -296,7 +327,7 @@ const UserList = ({ token }) => {
                         </div>
                       </td>
 
-                      {/* Email */}
+                      {/* EMAIL */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <FiMail size={15} className="text-gray-400" />
@@ -305,7 +336,7 @@ const UserList = ({ token }) => {
                         </div>
                       </td>
 
-                      {/* Role */}
+                      {/* ROLE */}
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold capitalize ${getRoleStyle(
@@ -317,7 +348,7 @@ const UserList = ({ token }) => {
                         </span>
                       </td>
 
-                      {/* Status */}
+                      {/* STATUS */}
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center gap-2 text-xs font-semibold ${
@@ -334,7 +365,7 @@ const UserList = ({ token }) => {
                         </span>
                       </td>
 
-                      {/* Action */}
+                      {/* ACTION */}
                       <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => navigate(`/users/${user._id}`)}
@@ -353,25 +384,12 @@ const UserList = ({ token }) => {
         )}
       </div>
 
-      {/* ================= MOBILE USER CARDS ================= */}
-
+      {/* MOBILE USER CARDS */}
       <div className="md:hidden space-y-4">
         {filteredUsers.length === 0 ? (
-          <div className="bg-white border border-gray-100 rounded-2xl py-14 px-4 text-center">
-            <FiUsers size={35} className="mx-auto text-gray-300 mb-3" />
-
-            <h3 className="text-lg font-semibold text-gray-800">
-              {search ? "No matching users found" : "No users available"}
-            </h3>
-
-            <p className="text-sm text-gray-500 mt-2">
-              {search
-                ? "Try another search."
-                : "Registered users will appear here."}
-            </p>
-          </div>
+          <EmptyUsers mobile />
         ) : (
-          filteredUsers.map((user) => {
+          visibleUsers.map((user) => {
             const displayName = getDisplayName(user);
 
             return (
@@ -380,7 +398,7 @@ const UserList = ({ token }) => {
                 onClick={() => navigate(`/users/${user._id}`)}
                 className="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all p-5 cursor-pointer"
               >
-                {/* User Header */}
+                {/* USER HEADER */}
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 text-lg font-bold shrink-0">
@@ -404,13 +422,14 @@ const UserList = ({ token }) => {
                   />
                 </div>
 
-                {/* Email */}
+                {/* EMAIL */}
                 <div className="flex items-center gap-2 mt-5 text-sm text-gray-600 break-all">
                   <FiMail size={16} className="text-gray-400 shrink-0" />
+
                   {user.email || "No email"}
                 </div>
 
-                {/* Role and Status */}
+                {/* ROLE AND STATUS */}
                 <div className="flex flex-wrap items-center gap-2 mt-4">
                   <span
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold capitalize ${getRoleStyle(
@@ -438,7 +457,7 @@ const UserList = ({ token }) => {
                   </span>
                 </div>
 
-                {/* View Details */}
+                {/* VIEW DETAILS */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -454,6 +473,38 @@ const UserList = ({ token }) => {
           })
         )}
       </div>
+
+      {/* LOAD MORE */}
+      {remainingUsers > 0 && (
+        <div className="flex flex-col items-center justify-center mt-8 mb-6 gap-3">
+          <p className="text-xs text-gray-400">
+            Showing {visibleUsers.length} of {filteredUsers.length} users
+          </p>
+
+          <button
+            onClick={loadMoreUsers}
+            className="flex items-center justify-center gap-2 px-7 py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100 hover:border-gray-300 shadow-sm transition-all active:scale-95"
+          >
+            Load More Users
+            <FiChevronDown size={17} />
+          </button>
+
+          <p className="text-xs text-gray-400">
+            {remainingUsers} more {remainingUsers === 1 ? "user" : "users"}{" "}
+            remaining
+          </p>
+        </div>
+      )}
+
+      {/* ALL USERS LOADED */}
+      {filteredUsers.length > 0 && remainingUsers === 0 && (
+        <div className="text-center py-8">
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+            <FiUserCheck size={16} />
+            All users loaded
+          </div>
+        </div>
+      )}
     </div>
   );
 };

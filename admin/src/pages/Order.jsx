@@ -15,7 +15,10 @@ import {
   FiShoppingBag,
   FiUser,
   FiAlertTriangle,
+  FiChevronDown,
 } from "react-icons/fi";
+
+const ORDERS_PER_PAGE = 5;
 
 const Order = ({ token }) => {
   const [orders, setOrders] = useState([]);
@@ -23,6 +26,9 @@ const Order = ({ token }) => {
 
   // Search
   const [search, setSearch] = useState("");
+
+  // Load More
+  const [visibleCount, setVisibleCount] = useState(ORDERS_PER_PAGE);
 
   // Selection
   const [selectedOrders, setSelectedOrders] = useState([]);
@@ -57,6 +63,7 @@ const Order = ({ token }) => {
       if (response.data.success) {
         setOrders([...(response.data.orders || [])].reverse());
         setSelectedOrders([]);
+        setVisibleCount(ORDERS_PER_PAGE);
       } else {
         toast.error(response.data.message || "Unable to fetch orders");
       }
@@ -71,6 +78,11 @@ const Order = ({ token }) => {
   useEffect(() => {
     fetchAllOrders();
   }, [token]);
+
+  // Reset Load More when search changes
+  useEffect(() => {
+    setVisibleCount(ORDERS_PER_PAGE);
+  }, [search]);
 
   // Filter orders
   const filteredOrders = useMemo(() => {
@@ -94,6 +106,21 @@ const Order = ({ token }) => {
       );
     });
   }, [orders, search]);
+
+  // Orders currently visible
+  const visibleOrders = useMemo(() => {
+    return filteredOrders.slice(0, visibleCount);
+  }, [filteredOrders, visibleCount]);
+
+  // Load More handler
+  const loadMoreOrders = () => {
+    setVisibleCount((prev) =>
+      Math.min(prev + ORDERS_PER_PAGE, filteredOrders.length),
+    );
+  };
+
+  // Remaining orders
+  const remainingOrders = Math.max(filteredOrders.length - visibleCount, 0);
 
   // Order statistics
   const deliveredCount = orders.filter(
@@ -179,7 +206,7 @@ const Order = ({ token }) => {
     setShowPopup(true);
   };
 
-  // Delete selected orders one by one using existing API
+  // Delete selected orders
   const confirmDelete = async () => {
     if (!deleteIds.length) return;
 
@@ -263,8 +290,7 @@ const Order = ({ token }) => {
 
   return (
     <div className="w-full min-h-screen bg-gray-50/70 p-3 sm:p-5 lg:p-7">
-      {/* ================= HEADER ================= */}
-
+      {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2">
@@ -289,8 +315,7 @@ const Order = ({ token }) => {
         </button>
       </div>
 
-      {/* ================= STATISTICS ================= */}
-
+      {/* STATISTICS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5">
           <div className="flex items-center justify-between">
@@ -345,11 +370,9 @@ const Order = ({ token }) => {
         </div>
       </div>
 
-      {/* ================= SEARCH AND ACTIONS ================= */}
-
+      {/* SEARCH AND ACTIONS */}
       <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 mb-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Search */}
           <div className="relative w-full md:max-w-md">
             <FiSearch
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -365,7 +388,6 @@ const Order = ({ token }) => {
             />
           </div>
 
-          {/* Selection Actions */}
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm text-gray-500">
               {selectedOrders.length} selected
@@ -383,8 +405,7 @@ const Order = ({ token }) => {
         </div>
       </div>
 
-      {/* ================= SELECT ALL ================= */}
-
+      {/* SELECT ALL */}
       {filteredOrders.length > 0 && (
         <div className="flex items-center justify-between px-2 mb-4">
           <label className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-600">
@@ -394,17 +415,16 @@ const Order = ({ token }) => {
               onChange={toggleSelectAll}
               className="w-4 h-4 accent-black cursor-pointer"
             />
-            Select all visible orders
+            Select all filtered orders
           </label>
 
           <p className="text-xs text-gray-400">
-            Showing {filteredOrders.length} of {orders.length} orders
+            Showing {visibleOrders.length} of {filteredOrders.length} orders
           </p>
         </div>
       )}
 
-      {/* ================= ORDERS LIST ================= */}
-
+      {/* ORDERS LIST */}
       <div className="space-y-5">
         {filteredOrders.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm py-16 px-4 text-center">
@@ -423,7 +443,7 @@ const Order = ({ token }) => {
             </p>
           </div>
         ) : (
-          filteredOrders.map((order) => {
+          visibleOrders.map((order) => {
             const isSelected = selectedOrders.includes(order._id);
 
             return (
@@ -435,7 +455,7 @@ const Order = ({ token }) => {
                     : "border-gray-100"
                 }`}
               >
-                {/* Order Top Header */}
+                {/* ORDER HEADER */}
                 <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-4 bg-gray-50/70 border-b border-gray-100">
                   <div className="flex items-center gap-3">
                     <input
@@ -472,12 +492,12 @@ const Order = ({ token }) => {
                   </span>
                 </div>
 
-                {/* Order Content */}
+                {/* ORDER CONTENT */}
                 <div className="p-4 sm:p-6">
                   <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6">
-                    {/* Left: Customer and Products */}
+                    {/* CUSTOMER AND PRODUCTS */}
                     <div className="space-y-5">
-                      {/* Customer */}
+                      {/* CUSTOMER */}
                       <div>
                         <div className="flex items-center gap-2 mb-3">
                           <FiUser size={17} className="text-gray-500" />
@@ -518,9 +538,7 @@ const Order = ({ token }) => {
                         </div>
                       </div>
 
-                      {/* Products */}
-
-                      {/* Products */}
+                      {/* PRODUCTS */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
@@ -528,6 +546,7 @@ const Order = ({ token }) => {
                               size={17}
                               className="text-gray-500"
                             />
+
                             <h3 className="text-sm font-bold text-gray-800">
                               Ordered Products
                             </h3>
@@ -548,7 +567,9 @@ const Order = ({ token }) => {
                                   : item.images);
 
                             const quantity = Number(item.quantity || 1);
+
                             const price = Number(item.price || 0);
+
                             const subtotal = price * quantity;
 
                             return (
@@ -557,7 +578,7 @@ const Order = ({ token }) => {
                                 className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4"
                               >
                                 <div className="flex gap-3">
-                                  {/* Product Image */}
+                                  {/* IMAGE */}
                                   <div className="w-20 h-24 shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-gray-100">
                                     {productImage ? (
                                       <img
@@ -575,7 +596,7 @@ const Order = ({ token }) => {
                                     )}
                                   </div>
 
-                                  {/* Product Information */}
+                                  {/* PRODUCT DETAILS */}
                                   <div className="flex-1 min-w-0">
                                     <h4 className="text-sm font-bold text-gray-900 break-words">
                                       {item.name || "Unknown Product"}
@@ -586,6 +607,7 @@ const Order = ({ token }) => {
                                         <p className="text-xs text-gray-400">
                                           Size
                                         </p>
+
                                         <p className="text-sm font-semibold text-gray-700">
                                           {item.size || "N/A"}
                                         </p>
@@ -595,6 +617,7 @@ const Order = ({ token }) => {
                                         <p className="text-xs text-gray-400">
                                           Quantity
                                         </p>
+
                                         <p className="text-sm font-semibold text-gray-700">
                                           {quantity}
                                         </p>
@@ -604,6 +627,7 @@ const Order = ({ token }) => {
                                         <p className="text-xs text-gray-400">
                                           Unit Price
                                         </p>
+
                                         <p className="text-sm font-semibold text-gray-700">
                                           {currency}
                                           {price.toFixed(2)}
@@ -614,6 +638,7 @@ const Order = ({ token }) => {
                                         <p className="text-xs text-gray-400">
                                           Subtotal
                                         </p>
+
                                         <p className="text-sm font-bold text-gray-900">
                                           {currency}
                                           {subtotal.toFixed(2)}
@@ -629,9 +654,9 @@ const Order = ({ token }) => {
                       </div>
                     </div>
 
-                    {/* Right: Payment and Status */}
+                    {/* PAYMENT AND STATUS */}
                     <div className="space-y-5">
-                      {/* Order Summary */}
+                      {/* ORDER SUMMARY */}
                       <div>
                         <h3 className="text-sm font-bold text-gray-800 mb-3">
                           Order Summary
@@ -685,7 +710,7 @@ const Order = ({ token }) => {
                         </div>
                       </div>
 
-                      {/* Update Status */}
+                      {/* UPDATE STATUS */}
                       <div>
                         <label className="block text-sm font-bold text-gray-800 mb-3">
                           Update Order Status
@@ -723,7 +748,7 @@ const Order = ({ token }) => {
                         )}
                       </div>
 
-                      {/* Delete Single Order */}
+                      {/* DELETE SINGLE ORDER */}
                       <button
                         onClick={() => handleDeleteClick(order._id)}
                         className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-all"
@@ -740,8 +765,39 @@ const Order = ({ token }) => {
         )}
       </div>
 
-      {/* ================= DELETE CONFIRMATION MODAL ================= */}
+      {/* LOAD MORE */}
+      {remainingOrders > 0 && (
+        <div className="flex flex-col items-center justify-center mt-8 mb-6 gap-3">
+          <p className="text-xs text-gray-400">
+            Showing {visibleOrders.length} of {filteredOrders.length} orders
+          </p>
 
+          <button
+            onClick={loadMoreOrders}
+            className="flex items-center justify-center gap-2 px-7 py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100 hover:border-gray-300 shadow-sm transition-all active:scale-95"
+          >
+            Load More Orders
+            <FiChevronDown size={17} />
+          </button>
+
+          <p className="text-xs text-gray-400">
+            {remainingOrders} more {remainingOrders === 1 ? "order" : "orders"}{" "}
+            remaining
+          </p>
+        </div>
+      )}
+
+      {/* ALL ORDERS LOADED */}
+      {filteredOrders.length > 0 && remainingOrders === 0 && (
+        <div className="text-center py-8">
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+            <FiCheckCircle size={16} />
+            All orders loaded
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
       {showPopup && (
         <div
           onClick={() => !deleting && setShowPopup(false)}
@@ -803,7 +859,7 @@ const Order = ({ token }) => {
         </div>
       )}
 
-      {/* Animations */}
+      {/* ANIMATIONS */}
       <style>{`
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out;

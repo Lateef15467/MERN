@@ -16,8 +16,9 @@ import {
   FiFilter,
   FiTag,
   FiLayers,
-  FiDollarSign,
 } from "react-icons/fi";
+
+const PRODUCTS_PER_PAGE = 12;
 
 const List = ({ token }) => {
   const [list, setList] = useState([]);
@@ -27,6 +28,9 @@ const List = ({ token }) => {
   const [deleteId, setDeleteId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+
+  // Load More state
+  const [visibleProducts, setVisibleProducts] = useState(PRODUCTS_PER_PAGE);
 
   const navigate = useNavigate();
 
@@ -39,6 +43,7 @@ const List = ({ token }) => {
 
       if (response.data.success) {
         setList(response.data.products || []);
+        setVisibleProducts(PRODUCTS_PER_PAGE);
       } else {
         toast.error(response.data.message || "Unable to fetch products");
       }
@@ -79,6 +84,18 @@ const List = ({ token }) => {
     });
   }, [list, search, selectedCategory]);
 
+  // Reset visible products when search or category changes
+  useEffect(() => {
+    setVisibleProducts(PRODUCTS_PER_PAGE);
+  }, [search, selectedCategory]);
+
+  // Load More Products
+  const handleLoadMore = () => {
+    setVisibleProducts((prev) =>
+      Math.min(prev + PRODUCTS_PER_PAGE, filteredProducts.length),
+    );
+  };
+
   // Delete product
   const removeProduct = async () => {
     if (!deleteId) return;
@@ -118,6 +135,9 @@ const List = ({ token }) => {
   };
 
   const selectedProduct = list.find((item) => item._id === deleteId);
+
+  // Products currently displayed
+  const displayedProducts = filteredProducts.slice(0, visibleProducts);
 
   return (
     <div className="w-full space-y-6">
@@ -229,7 +249,7 @@ const List = ({ token }) => {
           <p className="text-xs text-gray-500">
             Showing{" "}
             <span className="font-semibold text-gray-800">
-              {filteredProducts.length}
+              {Math.min(visibleProducts, filteredProducts.length)}
             </span>{" "}
             of{" "}
             <span className="font-semibold text-gray-800">{list.length}</span>{" "}
@@ -250,7 +270,7 @@ const List = ({ token }) => {
         </div>
       </div>
 
-      {/* Loading */}
+      {/* Loading and Products */}
       {loading ? (
         <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
@@ -302,7 +322,7 @@ const List = ({ token }) => {
                 </thead>
 
                 <tbody className="divide-y divide-gray-100">
-                  {filteredProducts.map((item) => (
+                  {displayedProducts.map((item) => (
                     <tr
                       key={item._id}
                       className="transition hover:bg-gray-50/80"
@@ -384,7 +404,7 @@ const List = ({ token }) => {
 
           {/* Mobile Product Cards */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:hidden">
-            {filteredProducts.map((item) => (
+            {displayedProducts.map((item) => (
               <div
                 key={item._id}
                 className="overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
@@ -449,6 +469,19 @@ const List = ({ token }) => {
               </div>
             ))}
           </div>
+
+          {/* Load More Button */}
+          {visibleProducts < filteredProducts.length && (
+            <div className="flex justify-center pt-3">
+              <button
+                type="button"
+                onClick={handleLoadMore}
+                className="rounded-xl border border-gray-200 bg-white px-8 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-indigo-500 hover:bg-indigo-600 hover:text-white"
+              >
+                Load More Products
+              </button>
+            </div>
+          )}
         </>
       )}
 
